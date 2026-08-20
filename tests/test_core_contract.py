@@ -1,19 +1,13 @@
 from collections.abc import Iterator
 
-import pytest
 from aiogram import Router
-from aiogram.types import Message
 
 from src.core.auth import (
-    ADMIN_GATE_ATTR,
     ROUTER_REQUIRES_ADMIN,
     AdminGate,
     mark_admin_router,
-    require_admin,
 )
 from src.core.navigation import NavRegistry, NavSection, compose_message
-from src.core.database import Database
-from src.core.migrations import MigrationRegistry
 
 
 def _walk(router: Router) -> Iterator[Router]:

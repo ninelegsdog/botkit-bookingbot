@@ -1,9 +1,9 @@
 import pytest
 from sqlalchemy.pool import StaticPool
 
+from src.booking.models import register_migrations
 from src.core.database import Database
 from src.core.migrations import MigrationRegistry
-from src.booking.models import register_migrations
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ async def test_get_user_bookings_empty(db):
 
 
 async def test_book_slot_raises_on_missing(db):
-    from src.booking.service import book_slot, SlotUnavailableError
+    from src.booking.service import SlotUnavailableError, book_slot
 
     with pytest.raises(SlotUnavailableError):
         await book_slot(db, service_id=999, slot_id=999, user_id=1, name="Test", phone="+7000")

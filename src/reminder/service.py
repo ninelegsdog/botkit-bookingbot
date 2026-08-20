@@ -16,10 +16,11 @@ async def create_reminder(
             ),
             {"bid": booking_id, "uid": user_id, "fire": fire_at.isoformat(), "text": reminder_text},
         )
-        return result.first()[0]
+        row = result.first()
+        return int(row[0]) if row else 0
 
 
-async def get_due_reminders(db: Database) -> list[dict]:
+async def get_due_reminders(db: Database) -> list[dict[str, int | str]]:
     async with db.session() as conn:
         result = await conn.execute(
             text(

@@ -31,7 +31,7 @@ class MockPaymentProvider:
 
 class YooKassaPaymentProvider:
     def __init__(self, shop_id: str, secret_key: str) -> None:
-        from yookassa import Configuration
+        from yookassa import Configuration  # type: ignore[import-untyped]
 
         Configuration.account_id = shop_id
         Configuration.secret_key = secret_key
@@ -50,7 +50,7 @@ class YooKassaPaymentProvider:
                 "metadata": {"payload": payload},
             }
         )
-        return payment.confirmation.confirmation_url
+        return str(payment.confirmation.confirmation_url)
 
     async def verify_payment(self, message: Message) -> bool:
         payment = message.successful_payment

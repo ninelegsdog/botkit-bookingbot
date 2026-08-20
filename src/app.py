@@ -8,8 +8,8 @@ from src.core.navigation import NavRegistry
 def collect_routers(
     *, gate: AdminGate, nav: NavRegistry, db: Database
 ) -> list[Router]:
-    from src.booking.handlers import create_router as booking_router
     from src.admin.handlers import create_router as admin_router
+    from src.booking.handlers import create_router as booking_router
 
     return [
         booking_router(gate=gate, nav=nav, db=db),

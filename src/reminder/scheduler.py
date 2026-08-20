@@ -15,8 +15,8 @@ async def scheduler_loop(db: Database, bot: Bot, interval: int = 60) -> None:
             due = await service.get_due_reminders(db)
             for r in due:
                 try:
-                    await bot.send_message(r["user_id"], f"⏰ {r['text']}")
-                    await service.mark_sent(db, r["id"])
+                    await bot.send_message(int(r["user_id"]), f"⏰ {r['text']}")
+                    await service.mark_sent(db, int(r["id"]))
                 except Exception as e:
                     logger.warning("Failed to send reminder %s: %s", r["id"], e)
         except Exception as e:

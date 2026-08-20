@@ -52,8 +52,8 @@ def _user_id(event: Any) -> int | None:
     return None
 
 
-def require_admin(gate: AdminGate) -> Callable:
-    def decorator(func: Callable) -> Callable:
+def require_admin(gate: AdminGate) -> Callable[..., Any]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         setattr(func, ADMIN_GATE_ATTR, True)
 
         async def wrapper(*args: Any, **kwargs: Any) -> Any:

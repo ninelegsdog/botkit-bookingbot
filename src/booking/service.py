@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from sqlalchemy import text
 
@@ -9,7 +9,7 @@ class SlotUnavailableError(Exception):
     pass
 
 
-async def get_active_services(db: Database) -> list[dict]:
+async def get_active_services(db: Database) -> list[dict[str, object]]:
     async with db.session() as conn:
         result = await conn.execute(
             text("SELECT id, name, duration_min, price FROM services WHERE is_active = 1 ORDER BY name")
@@ -17,14 +17,14 @@ async def get_active_services(db: Database) -> list[dict]:
         return [dict(row._mapping) for row in result.all()]
 
 
-async def get_service(db: Database, service_id: int) -> dict | None:
+async def get_service(db: Database, service_id: int) -> dict[str, object] | None:
     async with db.session() as conn:
         result = await conn.execute(text("SELECT * FROM services WHERE id = :id"), {"id": service_id})
         row = result.first()
         return dict(row._mapping) if row else None
 
 
-async def get_schedule(db: Database, day_of_week: int) -> list[dict]:
+async def get_schedule(db: Database, day_of_week: int) -> list[dict[str, object]]:
     async with db.session() as conn:
         result = await conn.execute(
             text("SELECT * FROM weekly_schedule WHERE day_of_week = :dow ORDER BY start_time"),
@@ -61,7 +61,7 @@ async def get_available_dates(db: Database, service_id: int, days_ahead: int = 1
     return dates
 
 
-async def get_free_slots(db: Database, service_id: int, date_str: str) -> list[dict]:
+async def get_free_slots(db: Database, service_id: int, date_str: str) -> list[dict[str, object]]:
     async with db.session() as conn:
         result = await conn.execute(
             text(
@@ -81,7 +81,7 @@ async def book_slot(
             text("UPDATE slots SET is_booked = 1 WHERE id = :id AND is_booked = 0"),
             {"id": slot_id},
         )
-        if result.rowcount == 0:
+        if result.rowcount == 0:  # type: ignore[attr-defined]
             raise SlotUnavailableError()
 
         slot = await conn.execute(
@@ -93,7 +93,9 @@ async def book_slot(
 
         result = await conn.execute(
             text(
-                "INSERT INTO bookings (service_id, slot_id, client_user_id, client_name, client_phone, booking_date, start_time, status) "
+                "INSERT INTO bookings "
+                "(service_id, slot_id, client_user_id, client_name, "
+                "client_phone, booking_date, start_time, status) "
                 "VALUES (:sid, :slot, :uid, :name, :phone, :date, :time, 'confirmed') "
                 "RETURNING id"
             ),
@@ -107,10 +109,11 @@ async def book_slot(
                 "time": slot_row[1],
             },
         )
-        return result.first()[0]
+        row = result.first()
+        return int(row[0]) if row else 0
 
 
-async def get_user_bookings(db: Database, user_id: int) -> list[dict]:
+async def get_user_bookings(db: Database, user_id: int) -> list[dict[str, object]]:
     async with db.session() as conn:
         result = await conn.execute(
             text(
@@ -133,7 +136,7 @@ async def cancel_booking(db: Database, booking_id: int, user_id: int) -> bool:
             ),
             {"id": booking_id, "uid": user_id},
         )
-        if result.rowcount > 0:
+        if result.rowcount and result.rowcount > 0:  # type: ignore[attr-defined]
             booking = await conn.execute(
                 text("SELECT slot_id FROM bookings WHERE id = :id"), {"id": booking_id}
             )

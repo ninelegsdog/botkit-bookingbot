@@ -59,6 +59,8 @@ def create_router(
 
     @public.callback_query(F.data.startswith("book:service:"))
     async def select_service(callback: CallbackQuery) -> None:
+        if not callback.data:
+            return
         service_id = int(callback.data.split(":")[2])
         dates = await service.get_available_dates(db, service_id)
         if not dates:
@@ -74,6 +76,8 @@ def create_router(
 
     @public.callback_query(F.data.startswith("book:date:"))
     async def select_date(callback: CallbackQuery) -> None:
+        if not callback.data:
+            return
         parts = callback.data.split(":")
         service_id = int(parts[2])
         date_str = parts[3]
@@ -96,6 +100,8 @@ def create_router(
 
     @public.callback_query(F.data.startswith("book:slot:"))
     async def select_slot(callback: CallbackQuery, state: FSMContext) -> None:
+        if not callback.data:
+            return
         parts = callback.data.split(":")
         await state.update_data(service_id=int(parts[2]), slot_id=int(parts[3]))
         await state.set_state(BookingStates.waiting_phone)
@@ -151,6 +157,8 @@ def create_router(
 
     @public.callback_query(F.data.startswith("book:cancel:"))
     async def cancel(callback: CallbackQuery) -> None:
+        if not callback.data:
+            return
         booking_id = int(callback.data.split(":")[2])
         ok = await service.cancel_booking(db, booking_id, callback.from_user.id)
         if ok:

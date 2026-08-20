@@ -12,7 +12,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         self._max_idle = max_idle
         self._last_message: dict[int, float] = {}
 
-    async def __call__(self, handler: Callable, event: TelegramObject, data: dict[str, Any]) -> Any:
+    async def __call__(self, handler: Callable[..., Any], event: TelegramObject, data: dict[str, Any]) -> Any:
         user_id = getattr(getattr(event, "from_user", None), "id", None)
         if user_id is None:
             return await handler(event, data)

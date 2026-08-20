@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy.pool import StaticPool
 
+from src.booking.models import register_migrations
 from src.core.database import Database
 from src.core.migrations import MigrationRegistry
-from src.booking.models import register_migrations
 
 
 @pytest.fixture

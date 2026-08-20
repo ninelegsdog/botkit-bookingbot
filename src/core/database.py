@@ -9,10 +9,10 @@ from .migrations import Migration, MigrationRegistry
 
 class Database:
     def __init__(self, url: str, *, poolclass: type | None = None) -> None:
-        kwargs: dict = {"url": url}
         if poolclass is not None:
-            kwargs["poolclass"] = poolclass
-        self._engine = create_async_engine(**kwargs)
+            self._engine = create_async_engine(url, poolclass=poolclass)
+        else:
+            self._engine = create_async_engine(url)
         self._session_factory = async_sessionmaker(self._engine, expire_on_commit=False)
 
     @asynccontextmanager
@@ -22,9 +22,8 @@ class Database:
 
     @asynccontextmanager
     async def transaction(self) -> AsyncIterator[AsyncSession]:
-        async with self._session_factory() as session:
-            async with session.begin():
-                yield session
+        async with self._session_factory() as session, session.begin():
+            yield session
 
     async def init_database(self, registry: MigrationRegistry) -> None:
         applied = await self._applied_versions()
