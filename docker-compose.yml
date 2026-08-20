@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - botnet
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+    networks:
+      - botnet
+
+networks:
+  botnet:
