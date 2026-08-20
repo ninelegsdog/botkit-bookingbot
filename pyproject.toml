@@ -2,7 +2,7 @@
 name = "botkit-bookingbot"
 version = "0.1.0"
 description = "Telegram bot for booking appointments"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "aiogram>=3.30",
     "aiosqlite>=0.20",
@@ -31,12 +31,12 @@ filterwarnings = ["error::DeprecationWarning"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py313"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
 
 [tool.mypy]
 strict = true
-python_version = "3.13"
+python_version = "3.12"
 plugins = ["pydantic.mypy"]
