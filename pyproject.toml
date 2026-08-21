@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Telegram bot for booking appointments"
 requires-python = ">=3.12"
 dependencies = [
+    "prometheus-client>=0.20",
+    "sentry-sdk>=2.0",
     "aiogram>=3.30",
     "aiosqlite>=0.20",
     "sqlalchemy[asyncio]>=2.0",

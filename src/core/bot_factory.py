@@ -9,9 +9,7 @@ def create_bot(token: str) -> Bot:
     return Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
-def build_dispatcher(
-    *, routers: list[Any] | None = None, storage: Any = None, throttling: Any = None
-) -> Dispatcher:
+def build_dispatcher(*, routers: list[Any] | None = None, storage: Any = None, throttling: Any = None) -> Dispatcher:
     kwargs: dict[str, Any] = {}
     if storage:
         kwargs["storage"] = storage

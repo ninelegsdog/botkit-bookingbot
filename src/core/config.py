@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     yookassa_secret_key: str = ""
     webhook_secret_token: str = ""
     webhook_url: str = ""
+    sentry_dsn: str = ""
     metrics_port: int = 8080
     timezone: str = "Europe/Moscow"
     throttle_rate_limit: float = 0.5
