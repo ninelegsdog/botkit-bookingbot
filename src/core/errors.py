@@ -28,7 +28,7 @@ async def default_error_handler(event: TelegramObject, exception: Exception) -> 
 
 
 def register_error_handler(dp: Any) -> None:
-    @dp.error()  # type: ignore[untyped-decorator,misc]
+    @dp.error()  # type: ignore[untyped-decorator]
     async def _on_error(event: TelegramObject, exception: Exception) -> None:
         await default_error_handler(event, exception)
 
