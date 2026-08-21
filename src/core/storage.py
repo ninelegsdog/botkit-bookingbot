@@ -1,3 +1,5 @@
+import logging
+
 from aiogram.fsm.storage.base import BaseStorage
 from aiogram.fsm.storage.memory import MemoryStorage
 
@@ -11,5 +13,5 @@ def create_storage(redis_url: str | None) -> BaseStorage:
             redis = aioredis.from_url(redis_url)
             return RedisStorage(redis=redis)
         except ImportError:
-            pass
+            logging.getLogger(__name__).warning("redis not installed; falling back to MemoryStorage")
     return MemoryStorage()
