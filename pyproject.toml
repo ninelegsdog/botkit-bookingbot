@@ -9,7 +9,6 @@ dependencies = [
     "aiogram>=3.30",
     "aiosqlite>=0.20",
     "sqlalchemy[asyncio]>=2.0",
-    "alembic>=1.13",
     "redis>=5.0",
     "aiohttp>=3.9",
     "pydantic-settings>=2.0",
