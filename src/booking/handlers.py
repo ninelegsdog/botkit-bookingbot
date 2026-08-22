@@ -172,7 +172,7 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
     @public.callback_query(F.data == "privacy:cancel")
     async def privacy_cancel(callback: CallbackQuery) -> None:
         if callback.message:
-            await callback.message.edit_text("Отменено. Данные не тронуты.")
+            await callback.message.edit_text("Отменено. Данные не тронуты.")  # type: ignore[union-attr]
         await callback.answer()
 
     @public.callback_query(F.data == "privacy:confirm")
