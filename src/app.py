@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from aiogram import Router
 
 from src.core.auth import AdminGate
 from src.core.database import Database
 from src.core.navigation import NavRegistry
+
+if TYPE_CHECKING:
+    from src.core.payments import PaymentProvider
 
 
 def collect_routers(
@@ -11,7 +16,7 @@ def collect_routers(
     from src.admin.handlers import create_router as admin_router
     from src.booking import service as booking_service
     from src.booking.handlers import create_router as booking_router
-    from src.core.payments import MockPaymentProvider, PaymentProvider, attach_payment_handlers
+    from src.core.payments import MockPaymentProvider, attach_payment_handlers
 
     provider = payments or MockPaymentProvider()
     booking = booking_router(gate=gate, nav=nav, db=db, payments=provider)

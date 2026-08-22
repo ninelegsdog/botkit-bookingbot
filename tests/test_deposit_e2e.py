@@ -61,9 +61,7 @@ async def test_deposit_flow_books_then_marks_paid(env: Any) -> None:
     await dp.feed_update(bot, _paid_update(3, 42, f"deposit:{bid}"))
 
     async with db.session() as conn:
-        status_row = await conn.execute(
-            text("SELECT status FROM bookings WHERE id = :bid"), {"bid": bid}
-        )
+        status_row = await conn.execute(text("SELECT status FROM bookings WHERE id = :bid"), {"bid": bid})
         status_after = status_row.scalar_one()
     assert status_after == "paid"
 
