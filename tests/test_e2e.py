@@ -22,9 +22,7 @@ async def test_full_booking_flow(db):
 
     # Insert test service
     async with db.transaction() as conn:
-        await conn.execute(
-            text("INSERT INTO services (name, duration_min, price) VALUES ('Haircut', 30, 500)")
-        )
+        await conn.execute(text("INSERT INTO services (name, duration_min, price) VALUES ('Haircut', 30, 500)"))
 
     # Verify service created
     services = await service.get_active_services(db)
@@ -47,9 +45,7 @@ async def test_service_deactivation(db):
     from src.booking import service
 
     async with db.transaction() as conn:
-        await conn.execute(
-            text("INSERT INTO services (name, duration_min, price, is_active) VALUES ('Old', 60, 0, 0)")
-        )
+        await conn.execute(text("INSERT INTO services (name, duration_min, price, is_active) VALUES ('Old', 60, 0, 0)"))
 
     services = await service.get_active_services(db)
     assert len(services) == 0
@@ -60,9 +56,7 @@ async def test_cancellation_flow(db):
 
     # Create service
     async with db.transaction() as conn:
-        await conn.execute(
-            text("INSERT INTO services (name, duration_min, price) VALUES ('Test', 60, 100)")
-        )
+        await conn.execute(text("INSERT INTO services (name, duration_min, price) VALUES ('Test', 60, 100)"))
 
     # Create a slot
     async with db.transaction() as conn:
@@ -74,9 +68,7 @@ async def test_cancellation_flow(db):
         )
 
     # Book it
-    booking_id = await service.book_slot(
-        db, service_id=1, slot_id=1, user_id=123, name="Test", phone="+7000"
-    )
+    booking_id = await service.book_slot(db, service_id=1, slot_id=1, user_id=123, name="Test", phone="+7000")
     assert booking_id > 0
 
     # Verify booked
@@ -98,9 +90,7 @@ async def test_double_booking_prevention(db):
     from src.booking.service import SlotUnavailableError
 
     async with db.transaction() as conn:
-        await conn.execute(
-            text("INSERT INTO services (name, duration_min, price) VALUES ('Test', 60, 100)")
-        )
+        await conn.execute(text("INSERT INTO services (name, duration_min, price) VALUES ('Test', 60, 100)"))
         await conn.execute(
             text(
                 "INSERT INTO slots (service_id, date, start_time, end_time, is_booked) "
@@ -120,9 +110,7 @@ async def test_wrong_user_cancel(db):
     from src.booking import service
 
     async with db.transaction() as conn:
-        await conn.execute(
-            text("INSERT INTO services (name, duration_min, price) VALUES ('Test', 60, 100)")
-        )
+        await conn.execute(text("INSERT INTO services (name, duration_min, price) VALUES ('Test', 60, 100)"))
         await conn.execute(
             text(
                 "INSERT INTO slots (service_id, date, start_time, end_time, is_booked) "
@@ -130,9 +118,7 @@ async def test_wrong_user_cancel(db):
             )
         )
 
-    booking_id = await service.book_slot(
-        db, service_id=1, slot_id=1, user_id=100, name="A", phone="+7001"
-    )
+    booking_id = await service.book_slot(db, service_id=1, slot_id=1, user_id=100, name="A", phone="+7001")
 
     # Wrong user tries to cancel
     ok = await service.cancel_booking(db, booking_id, 999)

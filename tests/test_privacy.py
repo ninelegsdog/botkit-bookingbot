@@ -18,7 +18,7 @@ from src.core.bot_factory import build_dispatcher
 from src.core.database import Database
 from src.core.migrations import MigrationRegistry
 from src.core.navigation import NavRegistry
-from tests.test_fsm_e2e import FakeSession, _msg_update
+from tests.conftest import FakeSession, _msg_update  # noqa: F401
 
 
 @pytest.fixture
