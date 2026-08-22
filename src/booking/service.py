@@ -73,9 +73,7 @@ async def get_free_slots(db: Database, service_id: int, date_str: str) -> list[d
         return [dict(row._mapping) for row in result.all()]
 
 
-async def book_slot(
-    db: Database, *, service_id: int, slot_id: int, user_id: int, name: str, phone: str
-) -> int:
+async def book_slot(db: Database, *, service_id: int, slot_id: int, user_id: int, name: str, phone: str) -> int:
     async with db.transaction() as conn:
         result = await conn.execute(
             text("UPDATE slots SET is_booked = 1 WHERE id = :id AND is_booked = 0"),
@@ -84,9 +82,7 @@ async def book_slot(
         if result.rowcount == 0:  # type: ignore[attr-defined]
             raise SlotUnavailableError()
 
-        slot = await conn.execute(
-            text("SELECT date, start_time FROM slots WHERE id = :id"), {"id": slot_id}
-        )
+        slot = await conn.execute(text("SELECT date, start_time FROM slots WHERE id = :id"), {"id": slot_id})
         slot_row = slot.first()
         if slot_row is None:
             raise SlotUnavailableError()
@@ -137,13 +133,27 @@ async def cancel_booking(db: Database, booking_id: int, user_id: int) -> bool:
             {"id": booking_id, "uid": user_id},
         )
         if result.rowcount and result.rowcount > 0:  # type: ignore[attr-defined]
-            booking = await conn.execute(
-                text("SELECT slot_id FROM bookings WHERE id = :id"), {"id": booking_id}
-            )
+            booking = await conn.execute(text("SELECT slot_id FROM bookings WHERE id = :id"), {"id": booking_id})
             slot_row = booking.first()
             if slot_row and slot_row[0]:
-                await conn.execute(
-                    text("UPDATE slots SET is_booked = 0 WHERE id = :id"), {"id": slot_row[0]}
-                )
+                await conn.execute(text("UPDATE slots SET is_booked = 0 WHERE id = :id"), {"id": slot_row[0]})
             return True
         return False
+
+
+async def delete_user_data(db: Database, user_id: int) -> int:
+    """Delete all personal data for a user. Returns number of bookings removed."""
+    async with db.transaction() as conn:
+        await conn.execute(text("DELETE FROM reminders WHERE user_id = :uid"), {"uid": user_id})
+        await conn.execute(text("DELETE FROM feedback WHERE user_id = :uid"), {"uid": user_id})
+        result = await conn.execute(text("DELETE FROM bookings WHERE client_user_id = :uid"), {"uid": user_id})
+        deleted = int(result.rowcount or 0)  # type: ignore[attr-defined]
+    return deleted
+
+
+async def log_audit(db: Database, user_id: int, action: str) -> None:
+    async with db.transaction() as conn:
+        await conn.execute(
+            text("INSERT INTO audit_log (client_user_id, action) VALUES (:uid, :action)"),
+            {"uid": user_id, "action": action},
+        )

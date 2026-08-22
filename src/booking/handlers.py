@@ -17,9 +17,7 @@ class BookingStates(StatesGroup):
     waiting_phone = State()
 
 
-def create_router(
-    *, gate: AdminGate, nav: NavRegistry, db: Database, payments: object | None = None
-) -> Router:
+def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: object | None = None) -> Router:
     nav.register(NAV_SECTION)
     public = Router(name="booking")
     admin = mark_admin_router(Router(name="booking_admin"))
@@ -66,10 +64,7 @@ def create_router(
         if not dates:
             await callback.answer("Нет свободных дат.", show_alert=True)
             return
-        buttons = [
-            [InlineKeyboardButton(text=d, callback_data=f"book:date:{service_id}:{d}")]
-            for d in dates[:10]
-        ]
+        buttons = [[InlineKeyboardButton(text=d, callback_data=f"book:date:{service_id}:{d}")] for d in dates[:10]]
         kb = InlineKeyboardMarkup(inline_keyboard=buttons)
         await callback.message.edit_text("Выберите дату:", reply_markup=kb)  # type: ignore
         await callback.answer()
@@ -128,9 +123,7 @@ def create_router(
             )
         except service.SlotUnavailableError:
             await state.clear()
-            await message.answer(
-                "❌ Слот уже занят. Выберите другой.", reply_markup=_main_menu()
-            )
+            await message.answer("❌ Слот уже занят. Выберите другой.", reply_markup=_main_menu())
 
     @public.callback_query(F.data == "book:my")
     async def my_bookings(callback: CallbackQuery) -> None:
@@ -140,15 +133,10 @@ def create_router(
             await callback.answer()
             return
         text = "\n".join(
-            f"#{b['id']} {b['service_name']} — {b['booking_date']} {b['start_time']} ({b['status']})"
-            for b in bookings
+            f"#{b['id']} {b['service_name']} — {b['booking_date']} {b['start_time']} ({b['status']})" for b in bookings
         )
         buttons = [
-            [
-                InlineKeyboardButton(
-                    text=f"❌ Отменить #{b['id']}", callback_data=f"book:cancel:{b['id']}"
-                )
-            ]
+            [InlineKeyboardButton(text=f"❌ Отменить #{b['id']}", callback_data=f"book:cancel:{b['id']}")]
             for b in bookings
         ]
         kb = InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -165,6 +153,36 @@ def create_router(
             await callback.answer("Запись отменена.", show_alert=True)
         else:
             await callback.answer("Не удалось отменить.", show_alert=True)
+
+    @public.message(Command("delete_my_data"))
+    async def delete_my_data(message: Message) -> None:
+        kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="✅ Да, удалить", callback_data="privacy:confirm"),
+                    InlineKeyboardButton(text="❌ Отмена", callback_data="privacy:cancel"),
+                ]
+            ]
+        )
+        await message.answer(
+            "⚠️ Это удалит все ваши записи, напоминания и отзывы. Действие необратимо.",
+            reply_markup=kb,
+        )
+
+    @public.callback_query(F.data == "privacy:cancel")
+    async def privacy_cancel(callback: CallbackQuery) -> None:
+        if callback.message:
+            await callback.message.edit_text("Отменено. Данные не тронуты.")
+        await callback.answer()
+
+    @public.callback_query(F.data == "privacy:confirm")
+    async def privacy_confirm(callback: CallbackQuery) -> None:
+        uid = callback.from_user.id
+        deleted = await service.delete_user_data(db, uid)
+        await service.log_audit(db, uid, "delete_my_data")
+        if callback.message:
+            await callback.message.edit_text(f"Удалено записей: {deleted}. Ваши данные стёрты.")  # type: ignore[union-attr]
+        await callback.answer()
 
     public.include_router(admin)
     return public

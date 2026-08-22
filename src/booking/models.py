@@ -70,6 +70,21 @@ MIGRATION = Migration(
     ),
 )
 
+AUDIT_MIGRATION = Migration(
+    version=2,
+    name="audit_log",
+    statements=(
+        """CREATE TABLE IF NOT EXISTS audit_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_user_id INTEGER NOT NULL,
+            action TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(client_user_id)",
+    ),
+)
+
 
 def register_migrations(registry: MigrationRegistry) -> None:
     registry.add(MIGRATION)
+    registry.add(AUDIT_MIGRATION)
