@@ -117,9 +117,24 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
                 phone=phone,
             )
             await state.clear()
+            deposit_kb: InlineKeyboardMarkup | None = _main_menu()
+            if payments is not None:
+                link = await payments.create_invoice_link(  # type: ignore[attr-defined]
+                    title="Депозит",
+                    description=f"Депозит по записи #{booking_id}",
+                    payload=f"deposit:{booking_id}",
+                    amount=500,
+                    currency="XTR",
+                )
+                deposit_kb = InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [InlineKeyboardButton(text="💳 Внести депозит", url=link)],
+                        *_main_menu().inline_keyboard,
+                    ]
+                )
             await message.answer(
                 compose_message(["Запись"], f"✅ Запись #{booking_id} подтверждена!"),
-                reply_markup=_main_menu(),
+                reply_markup=deposit_kb,
             )
         except service.SlotUnavailableError:
             await state.clear()

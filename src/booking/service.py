@@ -157,3 +157,14 @@ async def log_audit(db: Database, user_id: int, action: str) -> None:
             text("INSERT INTO audit_log (client_user_id, action) VALUES (:uid, :action)"),
             {"uid": user_id, "action": action},
         )
+
+
+async def mark_booking_paid(db: Database, booking_id: int) -> bool:
+    async with db.transaction() as conn:
+        result = await conn.execute(
+            text(
+                "UPDATE bookings SET status = 'paid' WHERE id = :bid AND status != 'cancelled'"
+            ),
+            {"bid": booking_id},
+        )
+        return bool(result.rowcount)  # type: ignore[attr-defined]
