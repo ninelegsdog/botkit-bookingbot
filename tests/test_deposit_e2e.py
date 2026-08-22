@@ -6,11 +6,10 @@ from typing import Any
 from aiogram.types import Message, SuccessfulPayment, Update
 from sqlalchemy import text
 
-from tests.conftest import (  # noqa: F401
+from tests.conftest import (
     _cb_update,
     _msg_update,
     _seed_service_and_slot,
-    env,
 )
 
 
