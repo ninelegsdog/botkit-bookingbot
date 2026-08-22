@@ -4,9 +4,16 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env
+    environment:
+      BOTKIT_DATABASE_URL: sqlite+aiosqlite:///data/app.db
+    user: 1001:1001
     read_only: true
     cap_drop: ["ALL"]
     security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
+    volumes:
+      - bot-data:/app/data
     depends_on:
       redis:
         condition: service_healthy
@@ -25,3 +32,6 @@ services:
 
 networks:
   botnet:
+
+volumes:
+  bot-data:
