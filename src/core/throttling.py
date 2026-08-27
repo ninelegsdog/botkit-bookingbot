@@ -1,3 +1,4 @@
+import contextlib
 import time
 from collections.abc import Callable
 from typing import Any
@@ -32,8 +33,6 @@ class ThrottlingMiddleware(BaseMiddleware):
                 pass
 
         self._local_cache[user_id] = now
-        try:
+        with contextlib.suppress(Exception):
             await self._redis.set(f"throttle:{user_id}", str(now), ex=int(self._max_idle))
-        except Exception:
-            pass
         return await handler(event, data)

@@ -1,6 +1,7 @@
-from pydantic_settings import BaseSettings
-from pydantic import model_validator
 from typing import Annotated
+
+from pydantic import model_validator
+from pydantic_settings import BaseSettings
 
 
 def parse_admin_ids(v: str | None) -> list[int]:
