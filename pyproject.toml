@@ -1,6 +1,6 @@
 [project]
 name = "botkit-bookingbot"
-version = "0.1.0"
+version = "1.0.0"
 description = "Telegram bot for booking appointments"
 requires-python = ">=3.12"
 dependencies = [
