@@ -10,7 +10,6 @@ services:
     environment:
       BOTKIT_DATABASE_URL: sqlite+aiosqlite:///data/app.db
     user: 1001:1001
-    read_only: true
     cap_drop: ["ALL"]
     security_opt: ["no-new-privileges:true"]
     tmpfs:

@@ -10,15 +10,16 @@ ROUTER_REQUIRES_ADMIN = "_requires_admin"
 
 
 class AdminGate:
-    def __init__(self, password: str) -> None:
+    def __init__(self, password: str, admin_ids: list[int] | None = None) -> None:
         self._password = password
+        self._admin_ids = set(admin_ids or [])
         self._authorized: set[int] = set()
         self._attempts: dict[int, list[float]] = {}
         self._throttle_window = 300.0
         self._max_attempts = 5
 
     def is_admin(self, user_id: int) -> bool:
-        return user_id in self._authorized
+        return user_id in self._admin_ids or user_id in self._authorized
 
     def authorize(self, user_id: int, password: str) -> bool:
         if password != self._password:
