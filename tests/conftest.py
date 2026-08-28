@@ -142,16 +142,16 @@ _PAYLOADS_DIR = Path(__file__).parent / "fixtures" / "payloads"
 
 
 @pytest.fixture
-def load_payload():
+def load_payload() -> Any:
     """Load a JSON Telegram-update fixture from tests/fixtures/payloads/."""
 
     def _load(name: str) -> dict[str, Any]:
-        return json.loads((_PAYLOADS_DIR / name).read_text(encoding="utf-8"))
+        return json.loads((_PAYLOADS_DIR / name).read_text(encoding="utf-8"))  # type: ignore[no-any-return]
 
     return _load
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(config: Any, items: Any) -> None:
     """Tag offline tests as no_req; skip real Telegram (req) tests without RUN_TELEGRAM_E2E=1."""
     for item in items:
         if "req" in item.keywords:
