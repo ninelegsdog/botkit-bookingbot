@@ -10,7 +10,7 @@ from aiogram.types import TelegramObject
 
 class ThrottlingMiddleware(BaseMiddleware):
     def __init__(self, redis_url: str, rate_limit: float = 0.5, max_idle: float = 60.0) -> None:
-        self._redis = redis.from_url(redis_url, decode_responses=True)
+        self._redis = redis.from_url(redis_url, decode_responses=True) if redis_url else None
         self._rate_limit = rate_limit
         self._max_idle = max_idle
         self._local_cache: dict[int, float] = {}
@@ -24,6 +24,8 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         # Check local cache first
         last = self._local_cache.get(user_id, 0)
+        if now - last < self._rate_limit and self._redis is None:
+            return None
         if now - last < self._rate_limit:
             try:
                 redis_last = await self._redis.get(f"throttle:{user_id}")
@@ -33,6 +35,7 @@ class ThrottlingMiddleware(BaseMiddleware):
                 pass
 
         self._local_cache[user_id] = now
-        with contextlib.suppress(Exception):
-            await self._redis.set(f"throttle:{user_id}", str(now), ex=int(self._max_idle))
+        if self._redis is not None:
+            with contextlib.suppress(Exception):
+                await self._redis.set(f"throttle:{user_id}", str(now), ex=int(self._max_idle))
         return await handler(event, data)
