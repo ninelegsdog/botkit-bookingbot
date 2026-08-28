@@ -5,8 +5,21 @@ from typing import Any
 
 from aiohttp import web
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, generate_latest
+from sqlalchemy import text
+
+from src.core.config import Settings
+from src.core.database import Database
 
 logger = logging.getLogger(__name__)
+
+_db: Database | None = None
+
+
+def _get_db() -> Database:
+    global _db
+    if _db is None:
+        _db = Database(Settings().database_url)
+    return _db
 
 UPDATES_TOTAL = Counter(
     "bot_updates_total",
@@ -34,7 +47,13 @@ class UpdatesMiddleware:
 
 
 async def health(request: web.Request) -> web.Response:
-    return web.Response(text="ok")
+    try:
+        db = _get_db()
+        async with db.session() as session:
+            await session.execute(text("SELECT 1"))
+        return web.Response(status=200, text="ok")
+    except Exception:
+        return web.Response(status=500, text="db unavailable")
 
 
 async def metrics(request: web.Request) -> web.Response:

@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from pydantic import model_validator
@@ -7,7 +8,16 @@ from pydantic_settings import BaseSettings
 def parse_admin_ids(v: str | None) -> list[int]:
     if not v:
         return []
-    return [int(x.strip()) for x in v.split(",") if x.strip()]
+    result: list[int] = []
+    for token in v.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        try:
+            result.append(int(token))
+        except ValueError:
+            logging.warning("Invalid admin id ignored: %r", token)
+    return result
 
 
 class Settings(BaseSettings):
