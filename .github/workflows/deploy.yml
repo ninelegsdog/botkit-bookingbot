@@ -14,7 +14,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      PORT: 8090
+      PORT: 8081
       BOT: botkit-bookingbot
     steps:
       - uses: actions/checkout@v4
