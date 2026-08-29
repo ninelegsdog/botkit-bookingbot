@@ -20,9 +20,9 @@ def test_parse_admin_ids() -> None:
 
 
 def test_settings_valid(monkeypatch) -> None:
-    monkeypatch.setenv("BOTKIT__BOT_TOKEN", "123456789:AAfake")
-    monkeypatch.setenv("BOTKIT__ADMIN_PASSWORD", "secret")
-    monkeypatch.setenv("BOTKIT__ADMIN_IDS", "[1,2]")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123456789:AAfake")
+    monkeypatch.setenv("ADMIN_PASSWORD", "secret")
+    monkeypatch.setenv("ADMIN_IDS", "[1,2]")
     s = Settings()
     assert s.bot_token == "123456789:AAfake"
     assert s.admin_ids == [1, 2]
@@ -30,9 +30,9 @@ def test_settings_valid(monkeypatch) -> None:
 
 
 def test_settings_missing_required(monkeypatch) -> None:
-    monkeypatch.delenv("BOTKIT__BOT_TOKEN", raising=False)
-    monkeypatch.delenv("BOTKIT__ADMIN_PASSWORD", raising=False)
-    monkeypatch.delenv("BOTKIT__ADMIN_IDS", raising=False)
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.delenv("ADMIN_PASSWORD", raising=False)
+    monkeypatch.delenv("ADMIN_IDS", raising=False)
     with pytest.raises(RuntimeError):
         Settings()
 
