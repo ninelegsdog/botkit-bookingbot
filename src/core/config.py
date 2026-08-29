@@ -5,7 +5,7 @@ from pydantic import BeforeValidator, Field, model_validator
 from pydantic_settings import BaseSettings
 
 
-def parse_admin_ids(v):
+def parse_admin_ids(v: str | int | list[int] | None) -> list[int]:
     if v is None:
         return []
     if isinstance(v, list):
