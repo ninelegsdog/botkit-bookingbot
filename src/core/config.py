@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -21,7 +21,7 @@ def parse_admin_ids(v: str | None) -> list[int]:
 
 
 class Settings(BaseSettings):
-    bot_token: str = ""
+    bot_token: str = Field("", validation_alias="TELEGRAM_BOT_TOKEN")
     admin_password: str = ""
     admin_ids: Annotated[list[int], parse_admin_ids] = []
     database_url: str = "sqlite+aiosqlite:///app.db"
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     throttle_rate_limit: float = 0.5
     throttle_max_idle: float = 60.0
 
-    model_config = {"env_prefix": "BOTKIT__", "env_file": ".env"}
+    model_config = {"env_file": ".env"}
 
     @model_validator(mode="after")
     def validate_required(self) -> "Settings":
