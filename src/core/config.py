@@ -1,15 +1,19 @@
 import logging
 from typing import Annotated
 
-from pydantic import Field, model_validator
+from pydantic import BeforeValidator, Field, model_validator
 from pydantic_settings import BaseSettings
 
 
-def parse_admin_ids(v: str | None) -> list[int]:
-    if not v:
+def parse_admin_ids(v):
+    if v is None:
         return []
+    if isinstance(v, list):
+        return [int(x) for x in v]
+    if isinstance(v, int):
+        return [v]
     result: list[int] = []
-    for token in v.split(","):
+    for token in str(v).split(","):
         token = token.strip()
         if not token:
             continue
@@ -23,7 +27,7 @@ def parse_admin_ids(v: str | None) -> list[int]:
 class Settings(BaseSettings):
     bot_token: str = Field("", validation_alias="TELEGRAM_BOT_TOKEN")
     admin_password: str = ""
-    admin_ids: Annotated[list[int], parse_admin_ids] = []
+    admin_ids: Annotated[list[int], BeforeValidator(parse_admin_ids)] = []
     database_url: str = "sqlite+aiosqlite:///app.db"
     redis_url: str | None = None
     yookassa_shop_id: str = ""
