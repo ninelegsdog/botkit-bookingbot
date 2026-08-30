@@ -12,5 +12,4 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --chown=botuser:botuser . .
 USER 1001:1001
 ARG PORT
-HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request as u; u.urlopen('http://localhost:8081/health')"
 CMD ["python", "-m", "bot"]
