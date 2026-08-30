@@ -62,7 +62,7 @@ plugins = ["pydantic.mypy"]
 branch = true
 source = ["src"]
 parallel = true
-omit = ["tests/*", "scripts/*"]
+omit = ["tests/*", "scripts/*", "bot.py", "src/core/tgwebhook.py"]
 
 [tool.coverage.report]
 show_missing = true
