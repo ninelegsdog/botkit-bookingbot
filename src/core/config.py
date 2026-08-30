@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     yookassa_secret_key: str = ""
     webhook_secret_token: str = ""
     webhook_url: str = ""
+    webhook_cert_path: str = ""
     sentry_dsn: str = ""
     metrics_port: int = 8080
     timezone: str = "Europe/Moscow"
