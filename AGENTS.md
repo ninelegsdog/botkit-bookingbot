@@ -20,3 +20,8 @@ User = product owner. Agent = инженер + devops + tech lead. Проакт�
 - Docker: user 1001:1001, read_only, cap_drop ALL
 - No secrets in code
 - `.env` for secrets
+
+## Code Patterns (from botkit-reminder fix)
+- `Database` class with `async_session` (async_sessionmaker) and `engine` (AsyncEngine) properties
+- Attach to `state.db` in `bot_factory.py` for handler access
+- Remove unused `type: ignore` comments after fixing types
