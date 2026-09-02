@@ -1,9 +1,9 @@
 """Cover src/core/tracing.py shim."""
 from __future__ import annotations
 
-import asyncio
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.core.tracing import (
     TracingMiddleware,
