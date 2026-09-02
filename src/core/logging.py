@@ -3,14 +3,22 @@ from __future__ import annotations
 
 from typing import Any
 
-from botkit_core.logging import (  # noqa: F401
-    ConversationContextFilter,
-    get_conversation_id,
-    get_json_formatter,
-    set_bot_name,
-    set_conversation_id,
-    setup_logging,
-)
+from botkit_core.logging import ConversationContextFilter as ConversationContextFilter
+from botkit_core.logging import get_conversation_id as get_conversation_id
+from botkit_core.logging import get_json_formatter as get_json_formatter
+from botkit_core.logging import set_bot_name as set_bot_name
+from botkit_core.logging import set_conversation_id as set_conversation_id
+from botkit_core.logging import setup_logging as setup_logging
+
+__all__ = [
+    "ConversationContextFilter",
+    "LoggingMiddleware",
+    "get_conversation_id",
+    "get_json_formatter",
+    "set_bot_name",
+    "set_conversation_id",
+    "setup_logging",
+]
 
 
 class LoggingMiddleware:
@@ -23,7 +31,6 @@ class LoggingMiddleware:
         data: dict[str, Any],
     ) -> Any:
         cid = "-"
-        # aiogram types: Message, CallbackQuery, etc. — try chat.id then from_user.id
         chat = getattr(event, "chat", None)
         if chat is not None and hasattr(chat, "id"):
             cid = str(chat.id)
@@ -32,7 +39,6 @@ class LoggingMiddleware:
             if user is not None and hasattr(user, "id"):
                 cid = str(user.id)
             else:
-                # fallback: try message.chat.id for callback queries
                 msg = getattr(event, "message", None)
                 if msg is not None:
                     c2 = getattr(msg, "chat", None)
