@@ -13,6 +13,7 @@ from src.core.bot_factory import build_dispatcher, create_bot
 from src.core.config import Settings
 from src.core.database import Database
 from src.core.errors import RetryMiddleware, register_error_handler
+from src.core.logging import LoggingMiddleware, setup_logging
 from src.core.metrics import UpdatesMiddleware, health, metrics, start_metrics_server
 from src.core.migrations import MigrationRegistry
 from src.core.navigation import NavRegistry
@@ -81,6 +82,7 @@ async def _run_polling(settings: Settings, dp: Any, bot: Any, shutdown_event: as
 
 async def main() -> None:
     settings = Settings()
+    setup_logging(level="INFO", json=True, bot_name="bookingbot")
     init_sentry(settings.sentry_dsn)
     registry = MigrationRegistry()
 
@@ -104,6 +106,7 @@ async def main() -> None:
             max_idle=settings.throttle_max_idle,
         ),
     )
+    dp.update.outer_middleware(LoggingMiddleware())
     dp.update.outer_middleware(UpdatesMiddleware())
     dp.message.middleware(RetryMiddleware())
     register_error_handler(dp)
