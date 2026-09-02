@@ -4,7 +4,11 @@ import logging
 from typing import Any
 
 from aiohttp import web
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, generate_latest
+from botkit_core.metrics import (
+    BOTKIT_ERRORS_TOTAL,
+    BOTKIT_UPDATES_TOTAL,
+)
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from sqlalchemy import text
 
 from src.core.config import Settings
@@ -21,16 +25,8 @@ def _get_db() -> Database:
         _db = Database(Settings().database_url)
     return _db
 
-UPDATES_TOTAL = Counter(
-    "bot_updates_total",
-    "Total updates received from Telegram",
-    ["type"],
-)
-ERRORS_TOTAL = Counter(
-    "bot_errors_total",
-    "Total errors handled by the global error handler",
-    ["error_type"],
-)
+UPDATES_TOTAL = BOTKIT_UPDATES_TOTAL
+ERRORS_TOTAL = BOTKIT_ERRORS_TOTAL
 
 
 class UpdatesMiddleware:
