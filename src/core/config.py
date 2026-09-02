@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     admin_password: str = ""
     admin_ids: Annotated[list[int], BeforeValidator(parse_admin_ids)] = []
     database_url: str = "sqlite+aiosqlite:///app.db"
-    redis_url: str | None = None
+    redis_url: str = "redis://127.0.0.1:6380/0"
     yookassa_shop_id: str = ""
     yookassa_secret_key: str = ""
     webhook_secret_token: str = ""
