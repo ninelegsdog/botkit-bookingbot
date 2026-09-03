@@ -14,6 +14,11 @@ from sqlalchemy import text
 from src.core.config import Settings
 from src.core.database import Database
 
+try:
+    from botkit_core import __version__ as _core_version
+except ImportError:
+    _core_version = "0.0.0"
+
 logger = logging.getLogger(__name__)
 
 _db: Database | None = None
@@ -43,6 +48,17 @@ class UpdatesMiddleware:
 
 
 async def health(request: web.Request) -> web.Response:
+    accept = request.headers.get("Accept", "")
+    if "application/json" in accept:
+        # JSON with version for version-drift guard
+        try:
+            db = _get_db()
+            async with db.session() as session:
+                await session.execute(text("SELECT 1"))
+            return web.json_response({"status": "ok", "version": _core_version})
+        except Exception:
+            return web.json_response({"status": "db unavailable", "version": _core_version}, status=500)
+    # Text fallback for old probes / curl
     try:
         db = _get_db()
         async with db.session() as session:
@@ -52,6 +68,10 @@ async def health(request: web.Request) -> web.Response:
         return web.Response(status=500, text="db unavailable")
 
 
+async def version(request: web.Request) -> web.Response:
+    return web.json_response({"version": _core_version, "service": "botkit"})
+
+
 async def metrics(request: web.Request) -> web.Response:
     return web.Response(body=generate_latest(), headers={"Content-Type": CONTENT_TYPE_LATEST})
 
@@ -59,6 +79,7 @@ async def metrics(request: web.Request) -> web.Response:
 def create_metrics_app() -> web.Application:
     app = web.Application()
     app.router.add_get("/health", health)
+    app.router.add_get("/version", version)
     app.router.add_get("/metrics", metrics)
     return app
 
