@@ -39,6 +39,7 @@ def test_redis_container_throttling() -> None:
 def test_sqlite_wal_mode() -> None:
     """SQLite WAL mode for concurrent access."""
     import asyncio
+
     import aiosqlite
 
     async def run() -> None:
