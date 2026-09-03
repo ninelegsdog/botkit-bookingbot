@@ -14,7 +14,7 @@ from src.core.config import Settings
 from src.core.database import Database
 from src.core.errors import RetryMiddleware, register_error_handler
 from src.core.logging import LoggingMiddleware, setup_logging
-from src.core.metrics import UpdatesMiddleware, health, metrics, start_metrics_server
+from src.core.metrics import UpdatesMiddleware, health, metrics, start_metrics_server, version
 from src.core.migrations import MigrationRegistry
 from src.core.navigation import NavRegistry
 from src.core.sentry import init_sentry
@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 def _build_webhook_app(dp: Any, bot: Any, settings: Settings) -> web.Application:
     app = build_webhook_app(dp, bot, settings.webhook_secret_token)
     app.router.add_get("/health", health)
+    app.router.add_get("/version", version)
     app.router.add_get("/metrics", metrics)
     return app
 
