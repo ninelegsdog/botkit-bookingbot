@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Final tests to reach 80% coverage."""
 from __future__ import annotations
 
