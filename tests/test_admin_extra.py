@@ -1,13 +1,8 @@
 """Extra tests for admin handlers to boost coverage to 80%."""
 from __future__ import annotations
 
-import pytest
-from unittest.mock import MagicMock
-from aiogram.types import Message, Chat, User
-
 from src.core.auth import AdminGate
-from src.core.navigation import NavRegistry
-from src.core.navigation import NavSection
+from src.core.navigation import NavRegistry, NavSection
 
 
 def test_admin_gate_is_admin() -> None:

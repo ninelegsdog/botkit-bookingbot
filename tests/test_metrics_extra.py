@@ -1,12 +1,13 @@
 """Extra tests for metrics health/version to boost coverage to 80%."""
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase
 
-from src.core.metrics import health, version, metrics, create_metrics_app
+from src.core.metrics import create_metrics_app, health
 
 
 class TestHealthExtra(AioHTTPTestCase):
@@ -56,7 +57,6 @@ class TestHealthExtra(AioHTTPTestCase):
 
 @pytest.mark.asyncio
 async def test_health_db_unavailable() -> None:
-    from src.core.metrics import health
     from aiohttp.test_utils import make_mocked_request
 
     with patch("src.core.metrics._get_db") as mock_get_db:

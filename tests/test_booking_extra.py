@@ -39,12 +39,11 @@ async def test_booking_get_service_not_found(db_extra):
 @pytest.mark.asyncio
 async def test_booking_get_free_slots(db_extra):
     from src.booking.service import get_free_slots
-    from sqlalchemy import text
 
     # Create service and slot via SQL
     async with db_extra.transaction() as conn:
-        await conn.execute(text("INSERT INTO services (id, name, duration_min, price, is_active) VALUES (1, 'Test', 30, 100, 1)"))
-        await conn.execute(text("INSERT INTO slots (id, service_id, date, start_time, end_time, is_booked) VALUES (1, 1, '2099-12-31', '10:00', '10:30', 0)"))
+        await conn.execute(text("INSERT INTO services (id, name, duration_min, price, is_active) VALUES (1, 'Test', 30, 100, 1)"))  # noqa: E501
+        await conn.execute(text("INSERT INTO slots (id, service_id, date, start_time, end_time, is_booked) VALUES (1, 1, '2099-12-31', '10:00', '10:30', 0)"))  # noqa: E501
 
     slots = await get_free_slots(db_extra, 1, "2099-12-31")
     assert len(slots) == 1
