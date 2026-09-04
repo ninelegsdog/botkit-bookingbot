@@ -2,9 +2,6 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
-from aiogram.types import Message, Chat, User, CallbackQuery
-from aiogram.fsm.context import FSMContext
 
 
 @pytest.mark.asyncio
@@ -17,9 +14,10 @@ async def test_booking_states() -> None:
 
 @pytest.mark.asyncio
 async def test_booking_service_helpers() -> None:
-    from src.booking.service import get_active_services
     from sqlalchemy.pool import StaticPool
+
     from src.booking.models import register_migrations
+    from src.booking.service import get_active_services
     from src.core.database import Database
     from src.core.migrations import MigrationRegistry
 
@@ -35,13 +33,14 @@ async def test_booking_service_helpers() -> None:
 
 @pytest.mark.asyncio
 async def test_booking_router_exists() -> None:
-    from src.booking.handlers import create_router
-    from src.core.auth import AdminGate
-    from src.core.navigation import NavRegistry
-    from src.core.database import Database
     from sqlalchemy.pool import StaticPool
+
+    from src.booking.handlers import create_router
     from src.booking.models import register_migrations
+    from src.core.auth import AdminGate
+    from src.core.database import Database
     from src.core.migrations import MigrationRegistry
+    from src.core.navigation import NavRegistry
 
     registry = MigrationRegistry()
     register_migrations(registry)
