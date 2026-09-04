@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 from sqlalchemy.pool import StaticPool
+
 from src.booking.models import register_migrations
 from src.core.database import Database
 from src.core.migrations import MigrationRegistry
@@ -27,8 +27,9 @@ async def test_admin_gate_full() -> None:
 
 @pytest.mark.asyncio
 async def test_booking_service_comprehensive() -> None:
-    from src.booking.service import get_active_services, get_service, get_available_dates
     from sqlalchemy import text
+
+    from src.booking.service import get_active_services, get_available_dates, get_service
 
     registry = MigrationRegistry()
     register_migrations(registry)
