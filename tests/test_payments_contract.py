@@ -1,12 +1,24 @@
 """Contract tests for payments (YooKassa/Stars) — respx-mock."""
 from __future__ import annotations
 
+import pytest
 from unittest.mock import MagicMock, patch
 
-import pytest
+try:
+    import yookassa
+
+    HAS_YOOKASSA = True
+except ImportError:
+    HAS_YOOKASSA = False
+
 from aiogram.types import Message
 
-from src.core.payments import MockPaymentProvider, YooKassaPaymentProvider
+from src.core.payments import MockPaymentProvider
+
+try:
+    from src.core.payments import YooKassaPaymentProvider
+except ImportError:
+    YooKassaPaymentProvider = None  # type: ignore
 
 
 @pytest.mark.asyncio
@@ -47,10 +59,12 @@ async def test_mock_provider_verify_payment_fail() -> None:
     assert await provider.verify_payment(msg) is False
 
 
+@pytest.mark.skipif(not HAS_YOOKASSA, reason="yookassa not installed")
 @pytest.mark.asyncio
 @patch("yookassa.Payment.create")
 async def test_yookassa_create_invoice_contract(mock_create: MagicMock) -> None:
-    # Mock YooKassa SDK
+    from src.core.payments import YooKassaPaymentProvider
+
     mock_payment = MagicMock()
     mock_payment.confirmation.confirmation_url = "https://yookassa.ru/confirm/pay_123"
     mock_create.return_value = mock_payment
@@ -67,8 +81,11 @@ async def test_yookassa_create_invoice_contract(mock_create: MagicMock) -> None:
     assert link == "https://yookassa.ru/confirm/pay_123"
 
 
+@pytest.mark.skipif(not HAS_YOOKASSA, reason="yookassa not installed")
 @pytest.mark.asyncio
 async def test_yookassa_verify_payment() -> None:
+    from src.core.payments import YooKassaPaymentProvider
+
     provider = YooKassaPaymentProvider(shop_id="123", secret_key="test_key")
     msg = Message.model_validate({
         "message_id": 1,
@@ -85,6 +102,7 @@ async def test_yookassa_verify_payment() -> None:
     assert await provider.verify_payment(msg) is True
 
 
+@pytest.mark.skipif(not HAS_YOOKASSA, reason="yookassa not installed")
 def test_create_payment_provider_factory() -> None:
     from src.core.payments import create_payment_provider
 
