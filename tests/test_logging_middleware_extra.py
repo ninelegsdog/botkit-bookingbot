@@ -1,8 +1,9 @@
 """Extra logging middleware tests for 100% coverage."""
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from src.core.logging import LoggingMiddleware, get_conversation_id, set_conversation_id
 
@@ -68,3 +69,12 @@ async def test_logging_middleware_no_ids() -> None:
     mw = LoggingMiddleware()
     event = MagicMock()
     event.chat = None
+    event.from_user = None
+    event.message = None
+
+    async def handler(event, data):
+        return get_conversation_id()
+
+    result = await mw(handler, event, {})
+    assert result == "-"
+    set_conversation_id("-")
