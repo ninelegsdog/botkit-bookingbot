@@ -3,9 +3,14 @@ from __future__ import annotations
 
 import logging
 from io import StringIO
-from unittest.mock import MagicMock
 
-from src.core.logging import ConversationContextFilter, get_conversation_id, set_conversation_id, set_bot_name, setup_logging
+from src.core.logging import (
+    ConversationContextFilter,
+    get_conversation_id,
+    set_bot_name,
+    set_conversation_id,
+    setup_logging,
+)
 
 
 def test_conversation_context_filter() -> None:
