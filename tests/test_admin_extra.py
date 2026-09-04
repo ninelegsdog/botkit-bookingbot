@@ -47,3 +47,22 @@ def test_nav_registry_breadcrumbs() -> None:
     registry.register(section)
     crumbs = registry.breadcrumbs("child")
     assert isinstance(crumbs, list)
+
+
+def test_admin_gate_throttling() -> None:
+    gate = AdminGate(password="secret", admin_ids=[1])
+    for _ in range(5):
+        assert gate.authorize(999, "wrong") is False
+    assert gate.authorize(999, "wrong") is False
+    assert gate.authorize(1000, "secret") is True
+
+
+def test_nav_registry_multiple() -> None:
+    registry = NavRegistry()
+    s1 = NavSection(slug="a", title="A")
+    s2 = NavSection(slug="b", title="B")
+    registry.register(s1)
+    registry.register(s2)
+    assert registry.get("a").title == "A"
+    assert registry.get("b").title == "B"
+    assert len(registry._sections) == 2
