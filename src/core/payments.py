@@ -1,9 +1,9 @@
 """Payments shim — re-exports botkit_core.payments."""
 from __future__ import annotations
 
+from botkit_core.payments import STARS_CURRENCY as STARS_CURRENCY
 from botkit_core.payments import MockPaymentProvider as MockPaymentProvider
 from botkit_core.payments import PaymentProvider as PaymentProvider
-from botkit_core.payments import STARS_CURRENCY as STARS_CURRENCY
 from botkit_core.payments import YooKassaPaymentProvider as YooKassaPaymentProvider
 from botkit_core.payments import attach_payment_handlers as attach_payment_handlers
 from botkit_core.payments import create_payment_provider as create_payment_provider
