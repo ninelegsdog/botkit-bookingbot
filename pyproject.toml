@@ -27,6 +27,7 @@ dev = [
     "aiohttp>=3.9",
     "requests>=2.31",
     "testcontainers[postgres,redis]>=4.0",
+    "asyncpg>=0.29",
 ]
 e2e = [
     "telethon>=1.34",
