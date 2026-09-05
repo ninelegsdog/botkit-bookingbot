@@ -36,7 +36,7 @@ e2e = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "-ra --strict-markers --cov=src --cov-branch --cov-report=term-missing --cov-fail-under=70"
+addopts = "-ra --strict-markers --cov=src --cov-branch --cov-report=term-missing --cov-fail-under=80"
 filterwarnings = ["error::DeprecationWarning"]
 markers = [
     "no_req: fully offline, no external HTTP/Telegram requests",
@@ -69,7 +69,7 @@ omit = ["tests/*", "scripts/*", "bot.py", "src/core/tgwebhook.py"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-fail_under = 73
+fail_under = 80
 exclude_also = ["if TYPE_CHECKING:", "if __name__ == .__main__.:"]
 
 [tool.coverage.xml]
