@@ -56,13 +56,14 @@ async def test_booking_router_exists() -> None:
 
 @pytest.mark.asyncio
 async def test_booking_handlers_extra_coverage() -> None:
-    from src.booking.handlers import create_router
-    from src.core.auth import AdminGate
-    from src.core.navigation import NavRegistry
-    from src.core.database import Database
     from sqlalchemy.pool import StaticPool
+
+    from src.booking.handlers import create_router
     from src.booking.models import register_migrations
+    from src.core.auth import AdminGate
+    from src.core.database import Database
     from src.core.migrations import MigrationRegistry
+    from src.core.navigation import NavRegistry
 
     registry = MigrationRegistry()
     register_migrations(registry)

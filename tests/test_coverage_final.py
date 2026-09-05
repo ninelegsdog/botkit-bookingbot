@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
+from sqlalchemy import text
 from sqlalchemy.pool import StaticPool
+
 from src.booking.models import register_migrations
 from src.core.database import Database
 from src.core.migrations import MigrationRegistry
-from sqlalchemy import text
 
 
 @pytest.mark.asyncio
@@ -52,7 +52,7 @@ async def test_booking_service_full() -> None:
 
 
 def test_navigation_comprehensive() -> None:
-    from src.core.navigation import NavRegistry, NavSection, escape_html, compose_message
+    from src.core.navigation import NavRegistry, NavSection, compose_message, escape_html
 
     reg = NavRegistry()
     s1 = NavSection(slug="x", title="X")

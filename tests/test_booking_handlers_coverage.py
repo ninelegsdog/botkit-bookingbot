@@ -9,7 +9,7 @@ import pytest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import Chat, Message, User
+from aiogram.types import Chat, User
 
 from src.admin.handlers import create_router as create_admin_router
 from src.booking.handlers import create_router as create_booking_router
@@ -211,7 +211,13 @@ class TestBookingPublicHandlers:
         handler = _find(booking_router, "callback_query", "my_bookings")
         cb = _make_callback("book:my")
         bookings = [
-            {"id": 3, "service_name": "Стрижка", "booking_date": "2026-09-10", "start_time": "10:00", "status": "active"}
+            {
+                    "id": 3,
+                    "service_name": "Стрижка",
+                    "booking_date": "2026-09-10",
+                    "start_time": "10:00",
+                    "status": "active",
+                }
         ]
         with patch("src.booking.service.get_user_bookings", new=AsyncMock(return_value=bookings)):
             await handler(cb)

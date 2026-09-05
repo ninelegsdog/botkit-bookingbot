@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 from sqlalchemy.pool import StaticPool
 
 from src.booking.models import register_migrations
