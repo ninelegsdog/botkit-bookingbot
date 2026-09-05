@@ -11,7 +11,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0",
     "redis>=5.0",
     "aiohttp>=3.9",
-    "botkit-core @ git+https://github.com/ninelegsdog/botkit-core@4082d43b6747ff936650c54c43ac69cf64782d0f",
+    "botkit-core @ git+https://github.com/ninelegsdog/botkit-core@4082d4345f0cb3958429a15a43be970c6a6b031c",
     "pydantic-settings>=2.0",
     "yookassa>=3.0",
 ]
