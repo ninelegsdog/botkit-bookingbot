@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import signal
 from pathlib import Path
 from typing import Any
@@ -45,7 +46,7 @@ async def _run_webhook(settings: Settings, dp: Any, bot: Any, shutdown_event: as
     app = _build_webhook_app(dp, bot, settings)
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", settings.metrics_port)
+    site = web.TCPSite(runner, os.getenv("BIND_HOST", "0.0.0.0"), settings.metrics_port)
     await site.start()
     logger.info("Webhook HTTP server listening on :%s", settings.metrics_port)
 
