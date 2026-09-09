@@ -64,4 +64,35 @@ def create_router(*, gate: AdminGate, nav: object, db: Database) -> Router:
         await callback.message.edit_text(text)  # type: ignore
         await callback.answer()
 
+    @admin.callback_query(F.data == "admin:schedule")
+    @require_admin(gate)
+    async def show_schedule(callback: CallbackQuery) -> None:
+        from src.booking.service import get_schedule
+
+        days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        lines: list[str] = []
+        for dow in range(7):
+            rows = await get_schedule(db, dow)
+            times = ", ".join(f"{r['start_time']}-{r['end_time']}" for r in rows)
+            lines.append(f"{days[dow]}: {times or '—'}")
+        await callback.message.edit_text("📅 Расписание (неделя):\n" + "\n".join(lines))
+        await callback.answer()
+
+    @admin.callback_query(F.data == "admin:bookings")
+    @require_admin(gate)
+    async def list_bookings(callback: CallbackQuery) -> None:
+        from src.booking.service import get_recent_bookings
+
+        bookings = await get_recent_bookings(db)
+        if bookings:
+            text = "🗓 Записи (последние):\n" + "\n".join(
+                f"• #{b['id']} {b['service_name']} — {b['booking_date']} {b['start_time']} "
+                f"({b['client_name'] or '—'}, {b['client_phone'] or '—'}, {b['status']})"
+                for b in bookings
+            )
+        else:
+            text = "Записей пока нет."
+        await callback.message.edit_text(text)
+        await callback.answer()
+
     return admin

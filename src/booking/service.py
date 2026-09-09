@@ -123,6 +123,20 @@ async def get_user_bookings(db: Database, user_id: int) -> list[dict[str, object
         return [dict(row._mapping) for row in result.all()]
 
 
+async def get_recent_bookings(db: Database, limit: int = 20) -> list[dict[str, object]]:
+    async with db.session() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT b.id, s.name AS service_name, b.booking_date, b.start_time, b.status, "
+                "b.client_name, b.client_phone "
+                "FROM bookings b JOIN services s ON b.service_id = s.id "
+                "ORDER BY b.booking_date DESC, b.start_time DESC LIMIT :limit"
+            ),
+            {"limit": limit},
+        )
+        return [dict(row._mapping) for row in result.all()]
+
+
 async def cancel_booking(db: Database, booking_id: int, user_id: int) -> bool:
     async with db.transaction() as conn:
         result = await conn.execute(
