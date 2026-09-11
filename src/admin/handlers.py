@@ -75,7 +75,7 @@ def create_router(*, gate: AdminGate, nav: object, db: Database) -> Router:
             rows = await get_schedule(db, dow)
             times = ", ".join(f"{r['start_time']}-{r['end_time']}" for r in rows)
             lines.append(f"{days[dow]}: {times or '—'}")
-        await callback.message.edit_text("📅 Расписание (неделя):\n" + "\n".join(lines))
+        await callback.message.edit_text("📅 Расписание (неделя):\n" + "\n".join(lines))  # type: ignore[union-attr]
         await callback.answer()
 
     @admin.callback_query(F.data == "admin:bookings")
@@ -92,7 +92,7 @@ def create_router(*, gate: AdminGate, nav: object, db: Database) -> Router:
             )
         else:
             text = "Записей пока нет."
-        await callback.message.edit_text(text)
+        await callback.message.edit_text(text)  # type: ignore[union-attr]
         await callback.answer()
 
     return admin
