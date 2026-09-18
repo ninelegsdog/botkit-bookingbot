@@ -2,7 +2,6 @@ name: botkit-bookingbot
 
 services:
   bot:
-    network_mode: host
     image: ghcr.io/ninelegsdog/botkit-bookingbot:${IMAGE_TAG:-main}
     container_name: botkit-bookingbot
     user: "1001:1001"
@@ -12,9 +11,13 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp
+    networks:
+      default:
+        aliases:
+          - botkit-bookingbot
     environment:
       - METRICS_PORT=${METRICS_PORT}
-      - BIND_HOST=127.0.0.1
+      - BIND_HOST=0.0.0.0
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET}
       - WEBHOOK_SECRET_TOKEN=${TELEGRAM_WEBHOOK_SECRET}
@@ -25,14 +28,22 @@ services:
       - REDIS_URL=${REDIS_URL}
       - DATABASE_URL=sqlite+aiosqlite:///./data/bot.db
       - DB_PATH=./data/bot.db
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
+    ports:
+      - "127.0.0.1:${METRICS_PORT}:${METRICS_PORT}"
     volumes:
       - ../data:/app/data
       - ../backups:/app/backups
       - /home/deploy/reverse-proxy/certs/fullchain.pem:/app/certs/fullchain.pem:ro
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request,socket; urllib.request.urlopen('http://localhost:${METRICS_PORT}/health',timeout=2); socket.create_connection(('127.0.0.1',6380),5).close()"]
+      test: ["CMD", "python3", "-c", "import urllib.request,socket; urllib.request.urlopen('http://127.0.0.1:${METRICS_PORT}/health',timeout=2); socket.create_connection(('redis',6379),5).close()"]
       interval: 30s
       timeout: 5s
       retries: 3
     restart: unless-stopped
     mem_limit: 1g
+
+networks:
+  default:
+    name: botkit_bookingbot
+    external: true
