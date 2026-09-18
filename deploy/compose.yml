@@ -15,6 +15,8 @@ services:
       default:
         aliases:
           - botkit-bookingbot
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - METRICS_PORT=${METRICS_PORT}
       - BIND_HOST=0.0.0.0
@@ -28,7 +30,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - DATABASE_URL=sqlite+aiosqlite:///./data/bot.db
       - DB_PATH=./data/bot.db
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://host.docker.internal:4318/v1/traces
     ports:
       - "127.0.0.1:${METRICS_PORT}:${METRICS_PORT}"
     volumes:
