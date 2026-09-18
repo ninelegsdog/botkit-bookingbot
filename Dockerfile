@@ -22,4 +22,6 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --chown=botuser:botuser . .
 USER 1001:1001
 ARG PORT
+ARG BUILD_SHA
+ENV BUILD_SHA=$BUILD_SHA
 CMD ["python", "-m", "bot"]
