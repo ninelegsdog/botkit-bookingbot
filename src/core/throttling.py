@@ -29,7 +29,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             return None
         if now - last < self._rate_limit and r is not None:
             try:
-                redis_last = await r.get(f"throttle:{user_id}")
+                redis_last = await r.get(f"throttle:bookingbot:{user_id}")
                 if redis_last and now - float(redis_last) < self._rate_limit:
                     return None
             except Exception:
@@ -38,5 +38,5 @@ class ThrottlingMiddleware(BaseMiddleware):
         self._local_cache[user_id] = now
         if r is not None:
             with contextlib.suppress(Exception):
-                await r.set(f"throttle:{user_id}", str(now), ex=int(self._max_idle))
+                await r.set(f"throttle:bookingbot:{user_id}", str(now), ex=int(self._max_idle))
         return await handler(event, data)

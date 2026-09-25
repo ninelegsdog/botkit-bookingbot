@@ -8,10 +8,11 @@ def create_storage(redis_url: str | None) -> BaseStorage:
     if redis_url:
         try:
             import redis.asyncio as aioredis
+            from aiogram.fsm.storage.base import DefaultKeyBuilder
             from aiogram.fsm.storage.redis import RedisStorage
 
             redis = aioredis.from_url(redis_url)
-            return RedisStorage(redis=redis)
+            return RedisStorage(redis=redis, key_builder=DefaultKeyBuilder(prefix="fsm:bookingbot"))
         except ImportError:
             logging.getLogger(__name__).warning("redis not installed; falling back to MemoryStorage")
     return MemoryStorage()
