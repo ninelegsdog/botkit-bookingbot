@@ -72,7 +72,8 @@ def main() -> int:
     if bot and bot.startswith("botkit-"):
         bot = bot[len("botkit-"):]
     try:
-        text = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
     except OSError as e:
         print(fail(f"cannot read {path}: {e}"))
         return 1
