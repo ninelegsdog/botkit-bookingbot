@@ -54,7 +54,7 @@ async def get_available_dates(db: Database, service_id: int, days_ahead: int = 1
                 text("SELECT COUNT(*) FROM slots WHERE service_id = :sid AND date = :date AND is_booked = 0"),
                 {"sid": service_id, "date": date_str},
             )
-            free = result.scalar_one()
+            free: int = result.scalar_one()
             if free and free > 0:
                 dates.append(date_str)
 
