@@ -17,7 +17,7 @@ import sys
 
 import yaml
 
-EXPECTED_ENV = {
+EXPECTED_ENV = {  # обязательный ПОДНАБОР (6-ботов канон имеет ещё WEBHOOK_SECRET)
     "BIND_HOST", "METRICS_PORT", "TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET",
     "WEBHOOK_SECRET_TOKEN", "WEBHOOK_URL", "WEBHOOK_CERT_PATH", "ADMIN_PASSWORD",
     "ADMIN_IDS", "REDIS_URL", "DATABASE_URL", "DB_PATH", "OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -141,8 +141,8 @@ def main() -> int:
     if missing_env:
         print(fail(f"environment missing keys: {sorted(missing_env)}"))
         return 1
-    checks.append(("environment has 13 unique expected keys",
-                   set(env_keys) == EXPECTED_ENV))
+    checks.append(("environment covers required expected keys",
+                   EXPECTED_ENV <= set(env_keys)))
 
     # extra_hosts
     eh = bot_svc.get("extra_hosts")
