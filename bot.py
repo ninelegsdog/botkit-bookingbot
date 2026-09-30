@@ -2,10 +2,8 @@ import asyncio
 import logging
 import os
 import signal
-from pathlib import Path
 from typing import Any
 
-from aiogram.types import BufferedInputFile
 from aiohttp import web
 
 from src.app import collect_routers
@@ -35,13 +33,6 @@ def _build_webhook_app(dp: Any, bot: Any, settings: Settings) -> web.Application
     return app
 
 
-def _load_cert(path: str) -> BufferedInputFile | None:
-    cert_path = Path(path)
-    if not cert_path.is_file():
-        return None
-    return BufferedInputFile(cert_path.read_bytes(), filename="webhook_public.pem")
-
-
 async def _run_webhook(settings: Settings, dp: Any, bot: Any, shutdown_event: asyncio.Event) -> None:
     app = _build_webhook_app(dp, bot, settings)
     runner = web.AppRunner(app)
@@ -51,15 +42,17 @@ async def _run_webhook(settings: Settings, dp: Any, bot: Any, shutdown_event: as
     logger.info("Webhook HTTP server listening on :%s", settings.metrics_port)
 
     await bot.delete_webhook(drop_pending_updates=True)
-    cert = await asyncio.to_thread(_load_cert, settings.webhook_cert_path)
-    if cert is None:
-        logger.warning("WEBHOOK_CERT_PATH not found: %s", settings.webhook_cert_path)
-    else:
-        logger.info("Using webhook certificate")
+    # No certificate here on purpose. Telegram's setWebhook pins the bot to the CA of
+    # whatever certificate is passed, so a renewal leaves the bot delivering to an
+    # endpoint it can no longer verify: updates stop while setWebhook still reports
+    # success. That is exactly the 26.09 incident - four of nine bots stopped
+    # receiving updates after certbot rotated the certificate, and only the bots that
+    # had been restarted re-registered, so the rest stayed healthy and hid the cause.
+    # TLS terminates at nginx with a publicly trusted certificate, so Telegram
+    # verifies the endpoint through the normal CA bundle and needs no pin.
     await bot.set_webhook(
         url=settings.webhook_url,
         secret_token=settings.webhook_secret_token or None,
-        certificate=cert,
     )
     logger.info("Telegram webhook registered: %s", settings.webhook_url)
     try:
