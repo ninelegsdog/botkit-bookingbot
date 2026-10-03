@@ -2,7 +2,7 @@ name: botkit-bookingbot
 
 services:
   bot:
-    image: ghcr.io/ninelegsdog/botkit-bookingbot:${IMAGE_TAG:-main}
+    image: "ghcr.io/ninelegsdog/botkit-bookingbot:${IMAGE_TAG:?IMAGE_TAG is not set - deploy through botkit-monitoring ops/rollout/deploy_rollout.sh}"
     container_name: botkit-bookingbot
     user: "1001:1001"
     cap_drop:
