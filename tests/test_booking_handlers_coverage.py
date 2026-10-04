@@ -88,10 +88,10 @@ def booking_router(gate, nav, db) -> Any:
 
 class TestBookingPublicHandlers:
 
-    async def test_start(self, booking_router):
+    async def test_start(self, booking_router, fsm):
         handler = _find(booking_router, "message", "start")
         msg = _make_message(text="/start")
-        await handler(msg)
+        await handler(msg, fsm)
         msg.answer.assert_awaited_once()
         _, kwargs = msg.answer.await_args
         assert "reply_markup" in kwargs

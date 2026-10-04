@@ -23,7 +23,8 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
     admin = mark_admin_router(Router(name="booking_admin"))
 
     @public.message(Command("start"))
-    async def start(message: Message) -> None:
+    async def start(message: Message, state: FSMContext) -> None:
+        await state.clear()
         text = compose_message(
             ["Запись"],
             "Выберите действие:",
