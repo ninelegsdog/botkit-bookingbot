@@ -12,6 +12,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import Chat, User
 
 from src.admin.handlers import create_router as create_admin_router
+from src.booking.handlers import BookingStates
 from src.booking.handlers import create_router as create_booking_router
 from src.core.auth import AdminGate
 from src.core.navigation import NavRegistry
@@ -95,6 +96,14 @@ class TestBookingPublicHandlers:
         msg.answer.assert_awaited_once()
         _, kwargs = msg.answer.await_args
         assert "reply_markup" in kwargs
+
+    async def test_start_clears_fsm_state(self, booking_router, fsm):
+        """Пользователь был посреди сценария: /start обязан сбросить состояние."""
+        await fsm.set_state(BookingStates.waiting_phone)
+        assert await fsm.get_state() is not None
+        handler = _find(booking_router, "message", "start")
+        await handler(_make_message(text="/start"), fsm)
+        assert await fsm.get_state() is None
 
     async def test_list_services_empty(self, booking_router, db):
         handler = _find(booking_router, "callback_query", "list_services")
