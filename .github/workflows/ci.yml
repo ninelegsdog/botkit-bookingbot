@@ -30,7 +30,7 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v5.0.0
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.0.0
         with:
           python-version: "3.13"
@@ -82,7 +82,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v5.0.0
         with:
           fetch-depth: 0
       
@@ -140,7 +140,7 @@ jobs:
     needs: check
     if: false  # Manual only for now, k6 sanity 100 RPS
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v5.0.0
       - name: Setup k6
         uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1  # v1  # v1
       - name: Validate k6 script
