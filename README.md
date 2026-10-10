@@ -28,7 +28,7 @@ Telegram-бот записи к специалистам с онлайн-опл�
 ## Быстрый старт
 
 ```bash
-cp .env.example .env      # заполнить BOTKIT__BOT_TOKEN и BOTKIT__ADMIN_IDS
+cp .env.example .env      # заполнить TELEGRAM_BOT_TOKEN и ADMIN_IDS
 uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 python -m bot
@@ -36,12 +36,10 @@ python -m bot
 
 ## Переменные окружения
 
-Ключи задаются с префиксом `BOTKIT__`: `BOTKIT__BOT_TOKEN`, `BOTKIT__ADMIN_IDS`,
-`BOTKIT__ADMIN_PASSWORD`, `BOTKIT__DATABASE_URL`, `BOTKIT__REDIS_URL`,
-`BOTKIT__YOOKASSA_SHOP_ID`, `BOTKIT__YOOKASSA_SECRET_KEY`,
-`BOTKIT__WEBHOOK_SECRET_TOKEN`, `BOTKIT__WEBHOOK_URL`, `BOTKIT__SENTRY_DSN`,
-`BOTKIT__METRICS_PORT`, `BOTKIT__TIMEZONE`, `BOTKIT__THROTTLE_RATE_LIMIT`,
-`BOTKIT__THROTTLE_MAX_IDLE`.
+Ключи задаются без префикса: `TELEGRAM_BOT_TOKEN` (токен бота), `ADMIN_IDS`,
+`ADMIN_PASSWORD`, `DATABASE_URL`, `REDIS_URL`, `YOOKASSA_SHOP_ID`,
+`YOOKASSA_SECRET_KEY`, `WEBHOOK_SECRET_TOKEN`, `WEBHOOK_URL`, `SENTRY_DSN`,
+`METRICS_PORT`, `TIMEZONE`, `THROTTLE_RATE_LIMIT`, `THROTTLE_MAX_IDLE`.
 
 Секреты не хранятся в git: `.env` в `.gitignore`, в CI включён gitleaks-гейт.
 
