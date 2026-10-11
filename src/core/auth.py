@@ -1,3 +1,4 @@
+import hmac
 import time
 from collections.abc import Callable
 from typing import Any
@@ -22,7 +23,7 @@ class AdminGate:
         return user_id in self._admin_ids or user_id in self._authorized
 
     def authorize(self, user_id: int, password: str) -> bool:
-        if password != self._password:
+        if not hmac.compare_digest(password, self._password):
             now = time.time()
             attempts = self._attempts.setdefault(user_id, [])
             attempts[:] = [t for t in attempts if now - t < self._throttle_window]
