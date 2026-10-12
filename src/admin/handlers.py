@@ -33,6 +33,15 @@ def create_router(*, gate: AdminGate, nav: object, db: Database) -> Router:
     @admin.message(AdminStates.waiting_password, text_not_command)
     async def check_password(message: Message, state: FSMContext) -> None:
         uid = message.from_user.id  # type: ignore
+        # The gate records failed attempts, but nothing was reading them: the
+        # admin surface allowed unlimited guesses. Checked BEFORE authorize,
+        # because authorize() accepts a correct password even inside the
+        # window by design - so a check after it would never refuse anything.
+        if gate.is_throttled(uid):
+            await state.clear()
+            await message.answer("⏳ Слишко много попыток. "
+                "Попробуйте через 5 минут.")
+            return
         if gate.authorize(uid, message.text or ""):
             await state.clear()
             await _show_admin_menu(message)
