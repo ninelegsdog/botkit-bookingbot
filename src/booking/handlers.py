@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from src.core.auth import AdminGate, mark_admin_router
+from src.core.callbacks import parse_callback_int
 from src.core.database import Database
 from src.core.fsm import text_not_command
 from src.core.navigation import NavRegistry, compose_message
@@ -60,7 +61,10 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
     async def select_service(callback: CallbackQuery) -> None:
         if not callback.data:
             return
-        service_id = int(callback.data.split(":")[2])
+        service_id = parse_callback_int(callback.data, "book:service:")
+        if service_id is None:
+            await callback.answer("Некорректный запрос.", show_alert=True)
+            return
         dates = await service.get_available_dates(db, service_id)
         if not dates:
             await callback.answer("Нет свободных дат.", show_alert=True)
@@ -163,7 +167,10 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
     async def cancel(callback: CallbackQuery) -> None:
         if not callback.data:
             return
-        booking_id = int(callback.data.split(":")[2])
+        booking_id = parse_callback_int(callback.data, "book:cancel:")
+        if booking_id is None:
+            await callback.answer("Некорректный запрос.", show_alert=True)
+            return
         ok = await service.cancel_booking(db, booking_id, callback.from_user.id)
         if ok:
             await callback.answer("Запись отменена.", show_alert=True)
