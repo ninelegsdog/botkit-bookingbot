@@ -47,11 +47,19 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
           REDIS_URL: redis://localhost:6379/0
       - name: Run integration tests (testcontainers)
-        run: pytest -m integration --cov=src --cov-append --cov-report=term-missing
+        # --run-integration is required: without it conftest skips every test marked
+        # `integration`, so this step exited green having run nothing. The flag makes the
+        # step either test something or fail, which is the whole point of having it.
+        #
+        # continue-on-error was removed deliberately. It arrived with the commit that made
+        # the SARIF upload non-blocking ("fix(ci): resolve real action SHAs; Publish-SBOM
+        # via anchore; non-blocking SARIF upload") and was still sitting on this step after
+        # the integration step was added later - a leftover that would have hidden a real
+        # regression here. No other bot's test step carries it.
+        run: pytest -m integration --run-integration --cov=src --cov-append --cov-report=term-missing
         env:
           DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
           REDIS_URL: redis://localhost:6379/0
-        continue-on-error: true
 
       # Pre-commit checks
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v6.0.0
