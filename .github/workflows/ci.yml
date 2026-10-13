@@ -47,7 +47,7 @@ jobs:
         run: uv sync --frozen --all-extras
       - run: uv run --frozen ruff check .
       - run: uv run --frozen mypy src/
-      - run: uv run --frozen pytest --cov=src --cov-report=xml
+      - run: uv run --frozen pytest --run-integration --cov=src --cov-report=xml
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         if: always()
         with:
@@ -56,22 +56,6 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
           REDIS_URL: redis://localhost:6379/0
-      - name: Run integration tests (testcontainers)
-        # --run-integration is required: without it conftest skips every test marked
-        # `integration`, so this step exited green having run nothing. The flag makes the
-        # step either test something or fail, which is the whole point of having it.
-        #
-        # continue-on-error was removed deliberately. It arrived with the commit that made
-        # the SARIF upload non-blocking ("fix(ci): resolve real action SHAs; Publish-SBOM
-        # via anchore; non-blocking SARIF upload") and was still sitting on this step after
-        # the integration step was added later - a leftover that would have hidden a real
-        # regression here. No other bot's test step carries it.
-        run: uv run --frozen pytest -m integration --run-integration --cov=src --cov-append --cov-report=term-missing
-        env:
-          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test
-          REDIS_URL: redis://localhost:6379/0
-
-      # Pre-commit checks
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v6.0.0
         with:
           python-version: "3.13"
