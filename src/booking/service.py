@@ -4,6 +4,15 @@ from sqlalchemy import text
 
 from src.core.database import Database
 
+# Stars (XTR), not roubles: the invoice is created with currency="XTR" and Telegram reports
+# pre_checkout.total_amount in the same unit, so this is the number both sides compare.
+#
+# One constant for the invoice and the pre_checkout gate because they must agree exactly -
+# core#8 refuses any amount it was not told to expect, so a mismatch here refuses every
+# deposit rather than accepting a wrong one. Hardcoding 500 twice would leave two literals
+# free to disagree about a sum of money.
+DEPOSIT_AMOUNT_STARS = 500
+
 
 class SlotUnavailableError(Exception):
     pass

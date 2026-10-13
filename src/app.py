@@ -32,7 +32,14 @@ def collect_routers(
             return
         await booking_service.mark_booking_paid(db, booking_id)
 
-    attach_payment_handlers(booking, provider, on_confirmed=_on_deposit_confirmed)
+    # expected_amount is load-bearing, not optional: core#8 refuses a pre_checkout
+    # that declares no expectation, so omitting it here rejected every deposit.
+    attach_payment_handlers(
+        booking,
+        provider,
+        on_confirmed=_on_deposit_confirmed,
+        expected_amount=booking_service.DEPOSIT_AMOUNT_STARS,
+    )
 
     return [
         booking,

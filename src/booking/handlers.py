@@ -128,7 +128,7 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
                     title="Депозит",
                     description=f"Депозит по записи #{booking_id}",
                     payload=f"deposit:{booking_id}",
-                    amount=500,
+                    amount=service.DEPOSIT_AMOUNT_STARS,
                     currency="XTR",
                 )
                 deposit_kb = InlineKeyboardMarkup(
