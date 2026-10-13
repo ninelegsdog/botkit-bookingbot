@@ -1,46 +1,18 @@
-import hmac
-import time
 from collections.abc import Callable
 from typing import Any
 
 from aiogram import Router
 from aiogram.types import Message
 
+# The gate lives in botkit-core and is re-exported rather than vendored. Five private
+# copies meant five places for a security fix to land in only some of them; reminder's
+# copy had already drifted into a different design. A re-export (not a subclass) keeps
+# them from diverging again.
+from botkit_core.admin import AdminGate as AdminGate
+
 ADMIN_GATE_ATTR = "_admin_gate"
 ROUTER_REQUIRES_ADMIN = "_requires_admin"
 
-
-class AdminGate:
-    def __init__(self, password: str, admin_ids: list[int] | None = None) -> None:
-        self._password = password
-        self._admin_ids = set(admin_ids or [])
-        self._authorized: set[int] = set()
-        self._attempts: dict[int, list[float]] = {}
-        self._throttle_window = 300.0
-        self._max_attempts = 5
-
-    def is_admin(self, user_id: int) -> bool:
-        return user_id in self._admin_ids or user_id in self._authorized
-
-    def authorize(self, user_id: int, password: str) -> bool:
-        if not hmac.compare_digest(password, self._password):
-            now = time.time()
-            attempts = self._attempts.setdefault(user_id, [])
-            attempts[:] = [t for t in attempts if now - t < self._throttle_window]
-            attempts.append(now)
-            return False
-        self._authorized.add(user_id)
-        self._attempts.pop(user_id, None)
-        return True
-
-    def deauthorize(self, user_id: int) -> None:
-        self._authorized.discard(user_id)
-
-    def is_throttled(self, user_id: int) -> bool:
-        now = time.time()
-        attempts = self._attempts.get(user_id, [])
-        attempts[:] = [t for t in attempts if now - t < self._throttle_window]
-        return len(attempts) >= self._max_attempts
 
 
 def mark_admin_router(router: Router) -> Router:
