@@ -1,20 +1,44 @@
 # BotKit Booking
 
-Telegram-бот записи к специалистам с онлайн-оплатой брони.
+A Telegram booking bot for appointments, with the booking paid for online.
 
-Живой бот: @SaasBookingKitBot · часть портфолио из 9 Telegram-ботов на Python.
+[![CI](https://github.com/ninelegsdog/botkit-bookingbot/actions/workflows/ci.yml/badge.svg)](https://github.com/ninelegsdog/botkit-bookingbot/actions/workflows/ci.yml) [![License](https://img.shields.io/github/license/ninelegsdog/botkit-bookingbot.svg)](LICENSE) [![Python](https://img.shields.io/badge/python-3.12-339933.svg)](#quick-start)
 
-## Возможности
+> **Status.** Runs in production on webhook transport. State: **production**.
 
-- Запись к специалистам: услуги, слоты, расписание
-- Онлайн-оплата брони (ЮKassa)
-- Личный кабинет клиента: «Мои записи», перенос и отмена
-- Напоминания о визите
-- Админка в чате: услуги, расписание, заявки, статистика
-- Антифлуд, `/metrics`, Sentry
-- Docker, webhook (prod) / polling (dev)
+## Contents
 
-## Стек
+- [What it does](#what-it-does)
+- [Features](#features)
+- [Stack](#stack)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Running in production](#running-in-production)
+- [Testing](#testing)
+- [How this is built](#how-this-is-built)
+- [Backups](#backups)
+- [Development process](#development-process)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+
+## What it does
+
+Part of a family of nine production Telegram bots on Python. Booking is the one with a double state — a slot is held while the customer pays, and the slot has to come back if they do not.
+
+The testing guide is the substantial document in this repository: it documents the test markers, the offline-versus-network split, and how to run the opt-in real-Telegram E2E suite.
+
+## Features
+
+- **Book against a specialist's schedule** — Services, slots and availability, so a slot is never double-held.
+- **Online payment for the booking** — YooKassa collects the fee at the point of reservation.
+- **Customer self-service** — "My bookings" lists appointments, and lets a customer reschedule or cancel.
+- **Visit reminders** — A booked appointment that nobody attends is a wasted slot.
+- **In-chat admin panel** — Services, schedule, requests and statistics, managed from the chat itself.
+- **Anti-flood, `/metrics`, Sentry** — The operational surface every bot in this family carries.
+
+## Stack
 
 - Python 3.12+
 - aiogram 3.x
@@ -25,71 +49,130 @@ Telegram-бот записи к специалистам с онлайн-опл�
 - Sentry
 - Docker, webhook (prod) / polling (dev)
 
-## Быстрый старт
+## Quick start
 
 ```bash
-cp .env.example .env      # заполнить TELEGRAM_BOT_TOKEN и ADMIN_IDS
+cp .env.example .env      # fill in TELEGRAM_BOT_TOKEN and ADMIN_IDS
 uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 python -m bot
 ```
 
-## Переменные окружения
+Requires **Python 3.12** and [`uv`](https://docs.astral.sh/uv/). Copy
+`.env.example` to `.env` and fill in the bot token and admin ids before starting.
 
-Ключи задаются без префикса: `TELEGRAM_BOT_TOKEN` (токен бота), `ADMIN_IDS`,
-`ADMIN_PASSWORD`, `DATABASE_URL`, `REDIS_URL`, `YOOKASSA_SHOP_ID`,
-`YOOKASSA_SECRET_KEY`, `WEBHOOK_SECRET_TOKEN`, `WEBHOOK_URL`, `SENTRY_DSN`,
-`METRICS_PORT`, `TIMEZONE`, `THROTTLE_RATE_LIMIT`, `THROTTLE_MAX_IDLE`.
+## Configuration
 
-Секреты не хранятся в git: `.env` в `.gitignore`, в CI включён gitleaks-гейт.
+Every variable is declared in [`.env.example`](.env.example); nothing is read that
+is not declared there.
 
-## Тесты
+| Variable | Required | Holds a secret |
+|---|---|---|
+| `ADMIN_IDS` | yes | no |
+| `ADMIN_PASSWORD` | yes | yes |
+| `DATABASE_URL` | no | no |
+| `METRICS_PORT` | no | no |
+| `REDIS_URL` | no | no |
+| `SENTRY_DSN` | no | yes |
+| `TELEGRAM_BOT_TOKEN` | yes | yes |
+| `THROTTLE_MAX_IDLE` | no | no |
+| `THROTTLE_RATE_LIMIT` | no | no |
+| `TIMEZONE` | no | no |
+| `WEBHOOK_SECRET_TOKEN` | no | yes |
+| `WEBHOOK_URL` | no | no |
+| `YOOKASSA_SECRET_KEY` | no | yes |
+| `YOOKASSA_SHOP_ID` | no | no |
+
+"Holds a secret" is classified by variable name, not by reading the value. Treat every `yes` as sensitive regardless.
+
+Secrets never enter git: `.env` is ignored, and CI runs a gitleaks gate over the
+history.
+
+## Running in production
+
+The bot runs behind a webhook with TLS and a health check. `deploy/` holds the
+production compose file and its own `.env.example`.
+
+```bash
+cd deploy && cp .env.example .env   # fill in, then bring the stack up
+```
+
+## Testing
 
 ```bash
 pytest
 ```
 
-Оффлайн-набор (без сети и Telegram) — `pytest -m no_req`. Гейт покрытия —
-`--cov-fail-under=80` в `pyproject.toml`; детали и уровни пирамиды —
-в [README-testing.md](README-testing.md).
+164 test functions across 34 files run offline in
+CI — no Telegram account and no network. Tests that need either are marked `req`
+and stay skipped unless `RUN_TELEGRAM_E2E=1` is set, so a fresh clone is green with
+no secrets.
 
-## Бэкапы
+The full guide is **[README-testing.md](README-testing.md)**: test markers, the offline-versus-network split, the opt-in real-Telegram E2E suite, and the webhook secret contract.
 
-Бэкапы и восстановление — общий контур на проде (systemd-таймеры, offsite restic,
-один общий Redis на все боты), а не отдельный скрипт внутри репозитория.
-Актуальная процедура и оговорки — в
-[`botkit-monitoring/ops/backup/RESTORE.md`](https://github.com/ninelegsdog/botkit-monitoring/blob/main/ops/backup/RESTORE.md).
+CI also gates the lockfile (`uv lock --check`), runs gitleaks over the history,
+scans the filesystem with Trivy, and validates the k6 load script.
 
-```bash
-# проверка бэкапа этого бота (ничего не меняет)
-/root/restore_test.sh botkit-bookingbot
+## How this is built
+
 ```
+src/
+├── admin/  handlers.py
+├── booking/  handlers.py, models.py, nav.py, service.py
+├── core/  auth.py, bot_factory.py, callbacks.py, config.py, database.py, errors.py
+└── reminder/  scheduler.py, service.py
+```
+
+`botkit-core` is a separate published library carrying the shared runtime. This
+repository depends on it by tag, not by path — see `pyproject.toml`.
+
+## Backups
+
+Backups and restore are a production-wide concern (systemd timers, offsite restic,
+one Redis shared across bots), not a script inside a repository. The current
+procedure and its caveats live in
+[`botkit-monitoring/ops/backup/RESTORE.md`](https://github.com/ninelegsdog/botkit-monitoring/blob/main/ops/backup/RESTORE.md).
 
 ## Development process
 
-Проект создан в AI-native процессе разработки: код производили AI coding-агенты
-в настроенном мной agent harness — то есть по слотам требований, инструкций, ограничений
-и критериев приёмки, которые я задал заранее.
+This project was built in an AI-native process: the implementation was produced by
+coding agents under human-led engineering control — requirement slots, constraints
+and acceptance criteria defined in advance, then specification, generation, run,
+check, fix.
 
-Моя роль в проекте:
+My role in the project:
 
-- продуктовая постановка и пользовательские сценарии;
-- декомпозиция задачи на самостоятельные инженерные этапы;
-- context engineering: инструкции, ограничения и рабочие правила для агентов;
-- управление контекстным окном между итерациями;
-- цикл «спецификация → генерация → запуск → проверка → исправление»;
-- валидация результата, тестирование, ревью;
-- контроль структуры репозитория, конфигурации, документации и воспроизводимости запуска.
+- product definition and user-facing scenarios;
+- decomposition into independent engineering stages;
+- context engineering: the instructions, constraints and working rules agents run under;
+- management of the context window between iterations;
+- the loop of specification → generation → run → verification → correction;
+- validation, testing and review;
+- control of repository structure, configuration, documentation and run reproducibility.
 
-Implementation code was generated with AI coding agents under human-led engineering control.
+Implementation code was generated with AI coding agents under human-led engineering
+control. The full description of the process, the `AGENTS.md` template, and the
+review checklists for AI-written code and secrets are in
+[agentic-development-playbook](https://github.com/ninelegsdog/agentic-development-playbook).
 
-Полное описание процесса, шаблон `AGENTS.md` и чек-листы ревью AI-кода и секретов —
-в репозитории [agentic-development-playbook](https://github.com/ninelegsdog/agentic-development-playbook).
+## Documentation
 
-## Лицензия
+- **[README-testing.md](README-testing.md)** — test markers, offline vs network suites, opt-in real-Telegram E2E, webhook secret contract.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — how to set up, what CI checks, what a PR must show.
+- **[SECURITY.md](SECURITY.md)** — how to report a vulnerability and what is in scope.
+- **[AGENTS.md](AGENTS.md)** — the rules a coding agent working here must follow.
+- **[CHANGELOG.md](CHANGELOG.md)** — what changed, and when.
 
-MIT — см. [LICENSE](LICENSE).
+## Contributing
 
-## Статус
+See [CONTRIBUTING.md](CONTRIBUTING.md). In short: install with `uv`, run `pytest`
+and `pre-commit run --all-files`, and explain why rather than what — the diff
+already shows what.
 
-Проект работает в продакшене (webhook, TLS, health-check). Состояние: **production**.
+## Security
+
+Do not open a public issue for a security problem. See [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
