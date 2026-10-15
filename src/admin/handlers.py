@@ -39,7 +39,7 @@ def create_router(*, gate: AdminGate, nav: object, db: Database) -> Router:
         # window by design - so a check after it would never refuse anything.
         if gate.is_throttled(uid):
             await state.clear()
-            await message.answer("⏳ Слишко много попыток. "
+            await message.answer("⏳ Слишком много попыток. "
                 "Попробуйте через 5 минут.")
             return
         if gate.authorize(uid, message.text or ""):

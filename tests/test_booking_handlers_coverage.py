@@ -323,7 +323,7 @@ class TestAdminHandlers:
     async def test_admin_list_services(self, nav, db):
         gate = AdminGate(password="secret", admin_ids=[456])
         router = create_admin_router(gate=gate, nav=nav, db=db)
-        wrapper = _find(router, "callback_query", "wrapper")
+        wrapper = _find(router, "callback_query", "list_services")
         list_services = _unwrap(wrapper)
         cb = _make_callback("admin:services", uid=456)
         services = [{"id": 1, "name": "Стрижка", "duration_min": 30, "price": 500}]
@@ -337,7 +337,7 @@ class TestAdminHandlers:
     async def test_admin_list_services_empty(self, nav, db):
         gate = AdminGate(password="secret", admin_ids=[456])
         router = create_admin_router(gate=gate, nav=nav, db=db)
-        wrapper = _find(router, "callback_query", "wrapper")
+        wrapper = _find(router, "callback_query", "list_services")
         list_services = _unwrap(wrapper)
         cb = _make_callback("admin:services", uid=456)
         with patch("src.booking.service.get_active_services", new=AsyncMock(return_value=[])):
