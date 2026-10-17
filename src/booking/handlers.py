@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -12,6 +14,8 @@ from src.core.navigation import NavRegistry, compose_message
 
 from . import service
 from .nav import NAV_SECTION
+
+logger = logging.getLogger(__name__)
 
 
 class BookingStates(StatesGroup):
@@ -122,6 +126,10 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
                 phone=phone,
             )
             await state.clear()
+            try:
+                await service.schedule_reminder(db, booking_id)
+            except Exception as e:  # A confirmed booking must survive a reminder failure.
+                logger.warning("Reminder not scheduled for booking %s: %s", booking_id, e)
             deposit_kb: InlineKeyboardMarkup | None = _main_menu()
             if payments is not None:
                 link = await payments.create_invoice_link(  # type: ignore[attr-defined]

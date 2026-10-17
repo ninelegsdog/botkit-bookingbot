@@ -1,8 +1,9 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 
 from sqlalchemy import text
 
 from src.core.database import Database
+from src.reminder import service as reminder_service
 
 # Stars (XTR), not roubles: the invoice is created with currency="XTR" and Telegram reports
 # pre_checkout.total_amount in the same unit, so this is the number both sides compare.
@@ -12,6 +13,10 @@ from src.core.database import Database
 # deposit rather than accepting a wrong one. Hardcoding 500 twice would leave two literals
 # free to disagree about a sum of money.
 DEPOSIT_AMOUNT_STARS = 500
+
+# How long before the visit the reminder goes out. Named once so the number stored in
+# fire_at and the number a reader sees in this file cannot disagree.
+REMINDER_LEAD_HOURS = 24
 
 
 class SlotUnavailableError(Exception):
@@ -118,6 +123,36 @@ async def book_slot(db: Database, *, service_id: int, slot_id: int, user_id: int
         return int(row[0]) if row else 0
 
 
+async def schedule_reminder(db: Database, booking_id: int) -> int | None:
+    """Create the visit reminder for a booking. Returns its id, or None.
+
+    Fires REMINDER_LEAD_HOURS before the slot. A booking made inside that window gets
+    no reminder: firing one minutes after the booking itself is noise, not service.
+    """
+    async with db.session() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT b.client_user_id, b.booking_date, b.start_time, s.name "
+                "FROM bookings b JOIN services s ON b.service_id = s.id WHERE b.id = :bid"
+            ),
+            {"bid": booking_id},
+        )
+        row = result.first()
+    if row is None:
+        return None
+    fire_at = datetime.combine(date.fromisoformat(str(row[1])), time.fromisoformat(str(row[2])))
+    fire_at -= timedelta(hours=REMINDER_LEAD_HOURS)
+    if fire_at <= datetime.now():
+        return None
+    return await reminder_service.create_reminder(
+        db,
+        booking_id=booking_id,
+        user_id=int(row[0]),
+        fire_at=fire_at,
+        reminder_text=f"Напоминание о визите: {row[3]} — {row[1]} в {row[2]}",
+    )
+
+
 async def get_user_bookings(db: Database, user_id: int) -> list[dict[str, object]]:
     async with db.session() as conn:
         result = await conn.execute(
@@ -160,6 +195,8 @@ async def cancel_booking(db: Database, booking_id: int, user_id: int) -> bool:
             slot_row = booking.first()
             if slot_row and slot_row[0]:
                 await conn.execute(text("UPDATE slots SET is_booked = 0 WHERE id = :id"), {"id": slot_row[0]})
+            # A cancelled visit stops reminding: the message is about the visit, not the row.
+            await conn.execute(text("UPDATE reminders SET is_active = 0 WHERE booking_id = :id"), {"id": booking_id})
             return True
         return False
 

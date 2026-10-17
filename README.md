@@ -103,7 +103,7 @@ cd deploy && cp .env.example .env   # fill in, then bring the stack up
 pytest
 ```
 
-164 test functions across 34 files run offline in
+174 test functions across 34 files run offline in
 CI — no Telegram account and no network. Tests that need either are marked `req`
 and stay skipped unless `RUN_TELEGRAM_E2E=1` is set, so a fresh clone is green with
 no secrets.

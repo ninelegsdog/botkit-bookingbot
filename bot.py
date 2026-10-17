@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 import signal
+from contextlib import suppress
 from typing import Any
 
 from aiohttp import web
@@ -21,6 +22,7 @@ from src.core.storage import create_storage
 from src.core.throttling import ThrottlingMiddleware
 from src.core.tracing import TracingMiddleware, setup_tracing
 from src.core.webhook import build_webhook_app
+from src.reminder.scheduler import scheduler_loop
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +112,10 @@ async def main() -> None:
     register_error_handler(dp)
     bot = create_bot(settings.bot_token)
 
+    # Reminders tick beside the transport: a scheduler that only ran when an update
+    # arrived would never fire for a bot that sits quiet all day.
+    reminder_task = asyncio.create_task(scheduler_loop(db, bot))
+
     shutdown_event = asyncio.Event()
 
     def _signal_handler() -> None:
@@ -119,10 +125,15 @@ async def main() -> None:
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, _signal_handler)
 
-    if settings.webhook_url:
-        await _run_webhook(settings, dp, bot, shutdown_event)
-    else:
-        await _run_polling(settings, dp, bot, shutdown_event)
+    try:
+        if settings.webhook_url:
+            await _run_webhook(settings, dp, bot, shutdown_event)
+        else:
+            await _run_polling(settings, dp, bot, shutdown_event)
+    finally:
+        reminder_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await reminder_task
 
 
 if __name__ == "__main__":

@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Visit reminders were advertised but never fired: nothing created a reminder when a
+  booking was confirmed, and no scheduler ran in the bot. A confirmed booking now
+  schedules one 24 hours before the slot, a cancellation deactivates it, and the
+  scheduler runs beside the transport.
 - `README-testing.md` was unreachable from the README in every bot of the family
   except one. A document nobody can reach is a document nobody reads; it is linked
   from the front page now.
