@@ -16,6 +16,7 @@ __pycache__/
 *.pyc
 .coverage
 coverage.xml
+coverage.json
 .hypothesis/
 # C1: prod deployment runtime (never commit)
 deploy/.env
