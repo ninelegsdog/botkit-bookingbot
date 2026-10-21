@@ -13,7 +13,12 @@ if TYPE_CHECKING:
 
 
 def collect_routers(
-    *, gate: AdminGate, nav: NavRegistry, db: Database, payments: PaymentProvider | None = None
+    *,
+    gate: AdminGate,
+    nav: NavRegistry,
+    db: Database,
+    payments: PaymentProvider | None = None,
+    admin_ids: list[int] | None = None,
 ) -> list[Router]:
     from src.admin.handlers import create_router as admin_router
     from src.booking import service as booking_service
@@ -21,7 +26,9 @@ def collect_routers(
     from src.core.payments import MockPaymentProvider, attach_payment_handlers
 
     provider = payments or MockPaymentProvider()
-    booking = booking_router(gate=gate, nav=nav, db=db, payments=provider)
+    booking = booking_router(
+        gate=gate, nav=nav, db=db, payments=provider, admin_ids=admin_ids
+    )
 
     async def _on_deposit_confirmed(payload: str) -> None:
         if not payload.startswith("deposit:"):
