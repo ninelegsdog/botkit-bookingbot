@@ -22,10 +22,38 @@ class BookingStates(StatesGroup):
     waiting_phone = State()
 
 
-def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: object | None = None) -> Router:
+def create_router(
+    *,
+    gate: AdminGate,
+    nav: NavRegistry,
+    db: Database,
+    payments: object | None = None,
+    admin_ids: list[int] | None = None,
+) -> Router:
     nav.register(NAV_SECTION)
     public = Router(name="booking")
     admin = mark_admin_router(Router(name="booking_admin"))
+    # F5: пустой каталог услуг — эксплуатационная авария, а не тишина. Клиенту
+    # по-прежнему вежливый отказ, владельцу — уведомление. Шторм-гвард: второй
+    # клиент подряд не порождает второе уведомление в течение окна.
+    owner_ids = list(admin_ids or [])
+    catalog_alerted_at: dict[int, float] = {}
+    catalog_alert_window = 600.0
+
+    async def _notify_empty_catalog(bot: object, user_id: int) -> None:
+        # Владелец недоступен (бот заблокирован, чат не начат) — не роняем ответ
+        # клиенту: молчание оператора хуже, чем потерянное уведомление, но отказ
+        # клиенту из-за этого недопустим.
+        for owner_id in owner_ids:
+            try:
+                await bot.send_message(  # type: ignore[attr-defined]
+                    owner_id,
+                    "⚠️ Каталог услуг пуст — клиентам нечего бронировать.\n"
+                    f"Запрос от пользователя {user_id}.\n"
+                    "Добавьте услуги в разделе /admin → Услуги.",
+                )
+            except Exception as e:  # pragma: no cover - зависит от сети Telegram
+                logger.warning("empty-catalog notice to %s failed: %s", owner_id, e)
 
     @public.message(Command("start"))
     async def start(message: Message, state: FSMContext) -> None:
@@ -46,6 +74,19 @@ def create_router(*, gate: AdminGate, nav: NavRegistry, db: Database, payments: 
     async def list_services(callback: CallbackQuery) -> None:
         services = await service.get_active_services(db)
         if not services:
+            # F5: клиент получает отказ, владелец — уведомление. Раньше на этом
+            # месте был только отказ: оператор не узнавал, что бронировать
+            # нечего, и тишина бота выглядела как «всё хорошо».
+            import time
+
+            now = time.time()
+            last = catalog_alerted_at.get(0, 0.0)
+            if owner_ids and now - last >= catalog_alert_window:
+                catalog_alerted_at[0] = now
+                if callback.bot is not None:
+                    await _notify_empty_catalog(
+                        callback.bot, int(callback.from_user.id)
+                    )
             await callback.answer("Нет доступных услуг.", show_alert=True)
             return
         buttons = [

@@ -94,7 +94,9 @@ async def main() -> None:
     await db.init_database(registry)
 
     gate = AdminGate(settings.admin_password, settings.admin_ids)
-    routers = collect_routers(gate=gate, nav=nav, db=db)
+    routers = collect_routers(
+        gate=gate, nav=nav, db=db, admin_ids=settings.admin_ids
+    )
 
     dp = build_dispatcher(
         routers=routers,
