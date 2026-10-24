@@ -176,3 +176,11 @@ Do not open a public issue for a security problem. See [SECURITY.md](SECURITY.md
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Screenshots
+
+| Старт | Выбор услуги/даты | Подтверждение | Оплата |
+|---|---|---|---|
+| ![Start](assets/screenshots/start.png) | ![Booking](assets/screenshots/booking.png) | ![Confirm](assets/screenshots/confirm.png) | ![Payment](assets/screenshots/payment.png) |
+
+*Скриншоты будут добавлены по мере обновления.*
