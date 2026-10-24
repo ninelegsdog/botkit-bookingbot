@@ -94,9 +94,24 @@ async def main() -> None:
     await db.init_database(registry)
 
     gate = AdminGate(settings.admin_password, settings.admin_ids)
+    # Демо по умолчанию: mock-провайдер. Переключение на реальный сервис —
+    # env PAYMENT_PROVIDER=yookassa (+ YOOKASSA_SHOP_ID/SECRET_KEY).
+    import os
+
+    from src.core.payments import create_payment_provider
+
+    provider_name = os.getenv("PAYMENT_PROVIDER", "mock").strip().lower() or "mock"
+    if provider_name == "yookassa":
+        payments = create_payment_provider(
+            "yookassa",
+            shop_id=settings.yookassa_shop_id,
+            secret_key=settings.yookassa_secret_key,
+        )
+    else:
+        payments = create_payment_provider("mock")
     routers = collect_routers(
-        gate=gate, nav=nav, db=db, admin_ids=settings.admin_ids
-    )
+        gate=gate, nav=nav, db=db, admin_ids=settings.admin_ids, payments=payments
+    ) (feat(payments): env-driven выбор провайдера (PAYMENT_PROVIDER) вместо жёсткого mock)
 
     dp = build_dispatcher(
         routers=routers,
