@@ -23,12 +23,7 @@ def collect_routers(
     from src.admin.handlers import create_router as admin_router
     from src.booking import service as booking_service
     from src.booking.handlers import create_router as booking_router
-    from src.core.payments import MockPaymentProvider, attach_payment_handlers
-
-    provider = payments or MockPaymentProvider()
-    booking = booking_router(
-        gate=gate, nav=nav, db=db, payments=provider, admin_ids=admin_ids
-    )
+    from src.core.payments import DemoPaymentProvider, MockPaymentProvider, attach_payment_handlers
 
     async def _on_deposit_confirmed(payload: str) -> None:
         if not payload.startswith("deposit:"):
@@ -38,6 +33,27 @@ def collect_routers(
         except ValueError:
             return
         await booking_service.mark_booking_paid(db, booking_id)
+
+    import os
+
+    if payments is None:
+        provider_name = os.getenv("PAYMENT_PROVIDER", "mock").strip().lower() or "mock"
+        if provider_name == "yookassa":
+            from src.core.payments import create_payment_provider
+
+            provider = create_payment_provider(
+                "yookassa",
+                shop_id=os.getenv("YOOKASSA_SHOP_ID", ""),
+                secret_key=os.getenv("YOOKASSA_SECRET_KEY", ""),
+            )
+        else:
+            provider = DemoPaymentProvider(on_confirmed=_on_deposit_confirmed)
+    else:
+        provider = payments
+
+    booking = booking_router(
+        gate=gate, nav=nav, db=db, payments=provider, admin_ids=admin_ids
+    )
 
     # expected_amount is load-bearing, not optional: core#8 refuses a pre_checkout
     # that declares no expectation, so omitting it here rejected every deposit.
