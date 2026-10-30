@@ -391,7 +391,7 @@ requires-dist = [
     { name = "aiohttp", marker = "extra == 'dev'", specifier = ">=3.9" },
     { name = "aiosqlite", specifier = ">=0.20" },
     { name = "asyncpg", marker = "extra == 'dev'", specifier = ">=0.29" },
-    { name = "botkit-core", git = "https://github.com/ninelegsdog/botkit-core?rev=v0.8.4" },
+    { name = "botkit-core", git = "https://github.com/ninelegsdog/botkit-core?rev=v0.8.5" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "prometheus-client", specifier = ">=0.20" },
     { name = "pydantic-settings", specifier = ">=2.0" },
@@ -413,8 +413,8 @@ provides-extras = ["dev", "e2e"]
 
 [[package]]
 name = "botkit-core"
-version = "0.8.2"
-source = { git = "https://github.com/ninelegsdog/botkit-core?rev=v0.8.4#99cb19da8169497ed2ac1fc90700af6f0f6e0525" }
+version = "0.8.5"
+source = { git = "https://github.com/ninelegsdog/botkit-core?rev=v0.8.5#5e86459b94590b680e7176c3ec43b4bf70beeee1" }
 dependencies = [
     { name = "aiogram" },
     { name = "aiohttp" },
