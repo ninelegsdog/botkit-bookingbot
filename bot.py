@@ -111,7 +111,7 @@ async def main() -> None:
         payments = create_payment_provider("mock")
     routers = collect_routers(
         gate=gate, nav=nav, db=db, admin_ids=settings.admin_ids, payments=payments
-    ) (feat(payments): env-driven выбор провайдера (PAYMENT_PROVIDER) вместо жёсткого mock)
+    )
 
     dp = build_dispatcher(
         routers=routers,

@@ -23,7 +23,7 @@ def collect_routers(
     from src.admin.handlers import create_router as admin_router
     from src.booking import service as booking_service
     from src.booking.handlers import create_router as booking_router
-    from src.core.payments import MockPaymentProvider, attach_payment_handlers, create_payment_provider
+    from src.core.payments import attach_payment_handlers, create_payment_provider
 
     async def _on_deposit_confirmed(payload: str, *, user_id: int | None = None) -> None:
         if not payload.startswith("deposit:"):
