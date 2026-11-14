@@ -159,7 +159,7 @@ async def get_user_bookings(db: Database, user_id: int) -> list[dict[str, object
             text(
                 "SELECT b.id, s.name as service_name, b.booking_date, b.start_time, b.status "
                 "FROM bookings b JOIN services s ON b.service_id = s.id "
-                "WHERE b.client_user_id = :uid AND b.status IN ('confirmed', 'pending') "
+                "WHERE b.client_user_id = :uid AND b.status IN ('confirmed', 'pending', 'paid') "
                 "ORDER BY b.booking_date, b.start_time"
             ),
             {"uid": user_id},
@@ -186,7 +186,7 @@ async def cancel_booking(db: Database, booking_id: int, user_id: int) -> bool:
         result = await conn.execute(
             text(
                 "UPDATE bookings SET status = 'cancelled' "
-                "WHERE id = :id AND client_user_id = :uid AND status IN ('confirmed', 'pending')"
+                "WHERE id = :id AND client_user_id = :uid AND status IN ('confirmed', 'pending', 'paid')"
             ),
             {"id": booking_id, "uid": user_id},
         )
