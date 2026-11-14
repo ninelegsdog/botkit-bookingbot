@@ -56,7 +56,7 @@ async def test_deposit_flow_books_then_marks_paid(env: Any) -> None:
     async with db.session() as conn:
         bid = int((await conn.execute(text("SELECT id FROM bookings"))).scalar_one())
         status_row = await conn.execute(text("SELECT status FROM bookings"))
-        assert status_row.scalar_one() == "confirmed"
+        assert status_row.scalar_one() == "paid"
 
     await dp.feed_update(bot, _paid_update(3, 42, f"deposit:{bid}"))
 
@@ -74,4 +74,4 @@ async def test_wrong_payload_ignored(env: Any) -> None:
     await dp.feed_update(bot, _paid_update(3, 42, "deposit:not-a-number"))
     async with db.session() as conn:
         statuses = (await conn.execute(text("SELECT status FROM bookings"))).all()
-    assert len(statuses) == 1 and statuses[0][0] == "confirmed"
+    assert len(statuses) == 1 and statuses[0][0] == "paid"
