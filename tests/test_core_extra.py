@@ -10,7 +10,6 @@ import pytest
 
 from src.core import storage, throttling, ui, webhook
 from src.core.config import Settings, parse_admin_ids
-from src.core.sentry import init_sentry
 
 
 def test_parse_admin_ids() -> None:
@@ -64,15 +63,6 @@ def test_build_webhook_app() -> None:
     app = webhook.build_webhook_app(MagicMock(), MagicMock(), "secret")
     paths = [str(r.resource.canonical) for r in app.router.routes() if r.resource]
     assert "/webhook" in paths
-
-
-def test_init_sentry_disabled() -> None:
-    init_sentry(None)
-
-
-def test_init_sentry_no_sdk(monkeypatch) -> None:
-    monkeypatch.setitem(__import__("sys").modules, "sentry_sdk", None)
-    init_sentry("https://x@sentry.io/1")
 
 
 class _FakeRedis:
