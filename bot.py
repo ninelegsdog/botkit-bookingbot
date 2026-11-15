@@ -17,7 +17,6 @@ from src.core.logging import LoggingMiddleware, setup_logging
 from src.core.metrics import UpdatesMiddleware, health, metrics, start_metrics_server, version
 from src.core.migrations import MigrationRegistry
 from src.core.navigation import NavRegistry
-from src.core.sentry import init_sentry
 from src.core.storage import create_storage
 from src.core.throttling import ThrottlingMiddleware
 from src.core.tracing import TracingMiddleware, setup_tracing
@@ -82,7 +81,6 @@ async def main() -> None:
     settings = Settings()
     setup_logging(level="INFO", json=True, bot_name="bookingbot")
     setup_tracing(service_name="bookingbot")
-    init_sentry(settings.sentry_dsn)
     registry = MigrationRegistry()
 
     from src.booking.models import register_migrations
